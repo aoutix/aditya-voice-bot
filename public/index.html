@@ -1,0 +1,1501 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-ground="sand" data-buttons="tonal" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aditya Das: ask me anything, out loud</title>
+<meta name="description" content="I’m Aditya Das. Press the mic, ask me a question, and hear me answer: backend systems in Dubai, refinery data in Abu Dhabi, and security tooling for AI agents.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aditya Das: ask me anything, out loud">
+<meta property="og:description" content="Press the mic and ask. I answer out loud, in my own words.">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#eef0f3">
+<!-- <link rel="canonical" href="https://[the domain, once it is known]/"> -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<style>
+:root {
+  --p-bg: #eef0f3; --p-surface: #e2e5ea; --p-ink: #0b0c0e; --p-muted: #5d6470;
+  --p-accent: #1f2de6; --p-accent-ink: #ffffff; --p-action: #1f2de6; --p-action-ink: #ffffff;
+  --p-inv-bg: #0b0c0e; --p-inv-surface: #17181a; --p-inv-ink: #eef0f3; --p-inv-muted: #8e8f92;
+  --p-inv-accent: #eef0f3; --p-inv-accent-ink: #0b0c0e; --p-inv-action: #eef0f3; --p-inv-action-ink: #0b0c0e;
+  --font-display: "Manrope", system-ui, sans-serif;
+  --font-text: "Manrope", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+  --ly-scale: 0.97;
+}
+</style>
+<link rel="stylesheet" href="assets/ui/base.css">
+<link rel="stylesheet" href="assets/ui/window/fragment.css">
+<link rel="stylesheet" href="assets/ui/chat/fragment.css">
+<link rel="stylesheet" href="assets/ui/code/fragment.css">
+<link rel="stylesheet" href="assets/ui/terminal-run/fragment.css">
+<link rel="stylesheet" href="assets/ui/pipeline-board/fragment.css">
+<link rel="stylesheet" href="assets/ui/integrations/fragment.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="assets/backgrounds/backgrounds.js"></script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<link rel="modulepreload" href="assets/moments/moments.js">
+<link rel="modulepreload" href="assets/moments/lib.js">
+<link rel="modulepreload" href="assets/moments/word-highlight/moment.js">
+<style>
+  /* page CSS: the live voice console inside the hero's frame, and the app frame's two panes */
+
+  /* the console is the real product: it sits in the hero's own media column */
+  .hero__media > .vb { width: 100%; height: 100%; display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-5); }
+  .vb__top { display: flex; align-items: center; gap: var(--s-3); min-height: 24px; }
+  .vb__status { font-size: var(--t-small); color: var(--muted); }
+  .vb__mid { flex: 1 1 auto; display: grid; place-content: center; justify-items: center; gap: var(--s-5); min-height: 0; }
+  .vb__orb { display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; }
+  .vb__hint { margin: 0; text-align: center; font-size: var(--t-small); line-height: 1.5; color: var(--u-muted); max-width: 34ch; margin-inline: auto; }
+  .vb.is-talking .vb__hint { display: none; }
+  .vb__limits { margin: 0; border-top: 1px solid var(--u-line); padding-top: 10px; font-size: var(--t-small); color: var(--u-muted); }
+  .vb__limits > summary { cursor: pointer; list-style: none; display: flex; gap: 8px; align-items: baseline; line-height: 1.45; }
+  .vb__limits > summary::-webkit-details-marker { display: none; }
+  .vb__limits > summary::after { content: "Show"; margin-left: auto; flex: none; color: var(--u-muted); text-decoration: underline; text-underline-offset: 2px; }
+  .vb__limits[open] > summary::after { content: "Hide"; }
+  .vb__limits > summary:focus-visible { outline: 2px solid var(--u-ring, currentColor); outline-offset: 3px; border-radius: 4px; }
+  .vb__limits b { color: var(--u-ink); font-weight: 600; }
+  .vb__tiers { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .vb__tiers li { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline; line-height: 1.45; }
+  .vb__tiers .ui-chip { flex: none; }
+  .vb__reset { margin: 10px 0 0; line-height: 1.45; }
+  .vb.is-talking .vb__mid { flex: 0 0 auto; }
+  .vb__disc { position: relative; width: 108px; height: 108px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, color-mix(in oklab, var(--action) 34%, var(--u-bg)), var(--u-bg) 72%); border: 1px solid var(--u-border); display: grid; place-items: center; transition: transform .24s cubic-bezier(.2,.7,.3,1); }
+  .vb__disc::after { content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--action) 36%, transparent); opacity: calc(.18 + var(--level, 0) * .82); transform: scale(calc(1 + var(--level, 0) * .14)); transition: opacity .18s linear, transform .18s linear; }
+  .vb__orb:hover .vb__disc { transform: scale(1.03); }
+  .vb__orb:active .vb__disc { transform: scale(.98); }
+  .vb__disc svg { width: 30px; height: 30px; fill: none; stroke: var(--u-ink); stroke-width: 1.5; stroke-linecap: round; }
+  .vb__log { flex: 0 1 auto; min-height: 0; max-height: 58%; overflow-y: auto; display: flex; flex-direction: column; gap: var(--s-3); font-size: var(--t-small); }
+  .turn { display: grid; gap: 2px; }
+  .turn__who { font-size: var(--t-label); font-weight: 500; color: var(--u-muted); }
+  .turn__text { margin: 0; font-size: var(--t-small); line-height: 1.55; color: var(--u-ink); }
+  .turn[data-partial="true"] .turn__text { color: var(--u-muted); }
+  .turn--note { font-size: var(--t-label); color: var(--u-muted); }
+  .vb__chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .vb__chips button { font: inherit; font-size: var(--t-label); padding: 6px 10px; min-height: 32px; color: var(--u-ink); background: var(--u-surface); border: 1px solid var(--u-border); border-radius: var(--r-sm); cursor: pointer; transition: transform .16s, background .16s; }
+  .vb__chips button:hover { transform: translateY(-2px); background: var(--u-bg); }
+  .vb__chips button:active { transform: translateY(0); }
+  .vb__ask { display: flex; gap: var(--s-2); }
+  .vb__ask input { flex: 1; min-width: 0; font: inherit; font-size: 16px; height: 44px; padding: 0 12px; color: var(--u-ink); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--r-sm); }
+  .vb__ask button { font: inherit; font-size: var(--t-small); font-weight: 500; height: 44px; padding: 0 14px; color: var(--p-action-ink); background: var(--action); border: 0; border-radius: var(--r-sm); cursor: pointer; }
+  @media (max-width: 1023px) { .hero__media > .vb { height: auto; } .vb__log { min-height: 128px; } }
+
+  /* app-frame (sections-library.md, app-frame): one window, the list beside the open item */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+  @media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+  @media (max-width: 1023px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane--list::after { display: none; }
+    .app .ui-win__side { display: none; }
+    .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+
+  /* #answers is a working panel, not a drawing: the rows are buttons, the search filters,
+     the box at the foot asks for real. Everything below makes that readable and reachable. */
+  .app--live { height: min(620px, 80vh); }
+  .app--live > .app__pane { overflow: hidden; }
+  .app--live > .app__pane::after { display: none; }
+  .app--live > .app__pane > .ui-panel { height: 100%; }
+  .app--live .ui-win { display: flex; flex-direction: column; height: 100%; }
+  .app--live .ui-win__body { flex: 1 1 auto; min-height: 0; }
+  .app--live .ui-win__side { overflow-y: auto; }
+  .app--live .ui-win__main { display: flex; flex-direction: column; min-height: 0; }
+  .app--live .ui-win__rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .app--live .ui-win__cols { flex: none; }
+
+  /* rows and sidebar items are real buttons: reset the control, keep the kit's grid */
+  .ui-win__rows .ui-win__row, .ui-win__side .ui-win__nav {
+    width: 100%; font: inherit; color: inherit; background: none; border: 0; text-align: left; cursor: pointer;
+  }
+  .ui-win__rows .ui-win__row { appearance: none; }
+  .ui-win__rows .ui-win__row:hover { background: color-mix(in oklab, var(--u-ink) 4%, var(--u-bg)); }
+  .ui-win__rows .ui-win__row[aria-selected="true"] { background: color-mix(in oklab, var(--u-accent) 8%, var(--u-bg)); }
+  .ui-win__rows .ui-win__row[hidden] { display: none; }
+  .ui-win__side .ui-win__nav:hover { background: var(--u-fill); color: var(--u-ink); }
+  .app--live :is(.ui-win__row, .ui-win__nav, .ans-doc__say, .ui-chat__send):focus-visible {
+    outline: 2px solid var(--u-accent); outline-offset: -2px; border-radius: 6px;
+  }
+  .ui-win__empty { margin: 0; padding: 18px 16px; font-size: 13px; line-height: 1.55; color: var(--u-muted); }
+
+  /* the search box in the window bar is a real input */
+  .ui-win__search { cursor: text; }
+  .ui-win__inp { flex: 1; min-width: 0; font: inherit; font-size: 13px; color: var(--u-ink); background: none; border: 0; padding: 0; }
+  .ui-win__inp:focus { outline: none; }
+  .ui-win__inp::placeholder { color: var(--u-soft); }
+  .ui-win__search:focus-within { box-shadow: inset 0 0 0 1px var(--u-accent); }
+  .ui-win__inp::-webkit-search-cancel-button { appearance: none; }
+
+  /* the open answer */
+  .app--live .ui-chat { display: flex; flex-direction: column; height: 100%; }
+  .app--live .ui-chat__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; align-content: start; scrollbar-width: thin; }
+  .app--live .ui-msg--bot { max-width: 56ch; }
+  .app--live .ui-msg--me { max-width: 44ch; }
+  .ans-doc { display: grid; gap: 12px; }
+  .ans-doc[hidden] { display: none; }
+  .ans-doc__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .ans-doc__say {
+    font: inherit; font-size: 13px; font-weight: 500; height: 30px; padding: 0 12px; cursor: pointer;
+    color: var(--u-ink); background: var(--u-bg); border: 0; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--u-line-2);
+  }
+  .ans-doc__say:hover { background: var(--u-fill); }
+  .ans-doc__meta { font-size: 13px; color: var(--u-soft); }
+  .ans-thread { display: grid; gap: 12px; }
+  .ans-thread:empty { display: none; }
+  .ans-note { font-size: 13px; line-height: 1.5; color: var(--u-soft); }
+  .ans-thread .ui-msg--bot[data-partial="true"] .ui-chat__answer { color: var(--u-muted); }
+  .ans__back { display: none; }
+  .app--live .ui-chat__input { gap: 6px; padding-right: 4px; }
+  .ui-chat__inp { flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--u-ink); background: none; border: 0; }
+  .ui-chat__inp:focus { outline: none; }
+  .ui-chat__inp::placeholder { color: var(--u-soft); }
+  .app--live .ui-chat__input:focus-within { box-shadow: inset 0 0 0 1px var(--u-accent); }
+  .ui-chat__send { border: 0; cursor: pointer; }
+
+  /* the kit collapses the search to its icon in a narrow window; here it is a real input, so it
+     keeps its room and the breadcrumb gives way instead */
+  @container ui-win (max-width: 419px) {
+    .app--live .ui-win__search { width: auto; flex: 1 1 110px; min-width: 0; padding: 0 8px; justify-content: flex-start; gap: 8px; }
+  }
+
+  @media (max-width: 1023px) {
+    .app--live { height: auto; grid-template-rows: minmax(0, 300px) minmax(0, 420px); }
+    .app--live > .app__pane--list { max-height: none; }
+    .app--live .ui-win__side { display: none; }
+    .app--live .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+  }
+  /* phone: one pane at a time — the list, then the answer with a way back */
+  @media (max-width: 639px) {
+    .app--live { grid-template-rows: minmax(0, 70vh); }
+    .app--live > .app__pane--list { display: block; }
+    .app--live.is-open > .app__pane--list { display: none; }
+    .app--live:not(.is-open) > .app__pane--open { display: none; }
+    .app--live .ans__back { display: grid; place-items: center; width: 28px; height: 28px; margin-left: -4px; color: var(--u-ink); background: none; border: 0; border-radius: 7px; cursor: pointer; }
+  }
+
+  /* the fan-in diagram fills its frame so the section is not half empty */
+  #work .frame--split { aspect-ratio: auto; height: 600px; }
+  @media (max-width: 1023px) { #work .frame--split { height: 560px; } }
+  @media (max-width: 639px) { #work .frame--split { height: 236px; } }
+
+  /* the three cards stack from 640 to 1023, so the section takes two screens there (layout-v4.md section 2) */
+  @media (min-width: 640px) and (max-width: 1279px) { #projects { --h: 2; } }
+
+  /* the three project cards hold drawn windows: each fragment fills its panel and is cut by the fade */
+  #projects .panel { --p-h: 416px; }
+  @media (max-width: 639px) { #projects .panel { --p-h: 330px; } }
+  #projects .pj > .ui { width: 100%; }
+  #projects .pj { --fit-max: 420px; --ax: 24px; --ay: 150px; --ay-sm: 96px; }
+  /* the work split: the provider list rises out of the frame's foot and is cut by its fade */
+  #work .wk { --fit-max: 560px; --ax: 34px; --ay: 168px; --ay-sm: 88px; }
+  #projects .ui-code__pre, #projects .ui-term__track, #projects .ui-pipe__cmd { font-size: 11px; }
+  @media (max-width: 1279px) { #projects .ui-code__pre, #projects .ui-term__track, #projects .ui-pipe__cmd { font-size: 10px; } }
+
+  /* the fan-in diagram fills its frame so the section is not half empty */
+  #work .frame--split { aspect-ratio: auto; height: 600px; }
+  @media (max-width: 1023px) { #work .frame--split { height: 420px; } }
+  @media (max-width: 639px) { #work .frame--split { height: 236px; } }
+
+  /* the moment's per-step visuals are drawn windows, not photographs: they fill the shared frame */
+  #projects .mo-pc__visual { display: grid; }
+  #projects .mo-pc__visual > .ui { width: 100%; height: 100%; min-height: 0; }
+  #projects .mo-pc__visual .ui-code__pre,
+  #projects .mo-pc__visual .ui-term__screen { flex: 1 1 auto; min-height: 0; }
+  /* the shared frame narrows with the viewport: the mono rows step down with it so no line is cut */
+  @media (max-width: 1279px) {
+    #projects .mo-pc__visual .ui-code__pre,
+    #projects .mo-pc__visual .ui-term__track,
+    #projects .mo-pc__visual .ui-pipe__cmd { font-size: 11.5px; }
+  }
+  @media (max-width: 1023px) {
+    #projects .mo-pc__visual .ui-code__pre,
+    #projects .mo-pc__visual .ui-term__track,
+    #projects .mo-pc__visual .ui-pipe__cmd { font-size: 10px; }
+  }
+  @media (max-width: 639px) {
+    #projects .mo-pc__visual .ui-code__pre,
+    #projects .mo-pc__visual .ui-term__track,
+    #projects .mo-pc__visual .ui-pipe__cmd { font-size: 9.5px; }
+  }
+  /* the moment's still variant caps its own photographs at 30svh (26 on a phone); these steps carry
+     drawn windows instead, so they take the same cap and the section keeps to its screens */
+  @media (min-width: 640px) { #projects:not(.is-live) .mo-pc__visual > .ui { max-height: 30svh; } }
+  @media (max-width: 639px) { #projects:not(.is-live) .mo-pc__visual > .ui { max-height: 26svh; } }
+
+  /* the moment's own phone rule replaces the system's --hm floor, which takes this section off the
+     390 screen grid and every section under it with it (layout-v4.md section 2): put it back. */
+  @media (max-width: 639px) {
+    main > #projects[data-moment]:not(.is-live) { min-height: calc(2 * 100lvh); }
+  }
+</style>
+</head>
+<body>
+<!-- type: software (site-kind software)
+     deal: hero split, nav nav-split (nav-cards dealt again: the page has no photographs for its
+           menu cards, sections.md section 2), close close-type, footer footer-statement,
+           rhythm surface-pairs, buttons tonal, mark dots, palette cool-grey-cobalt, type geist
+     moments: pinned-chapters on #projects -->
+
+<header class="nav nav--split">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#top">Skip to content</a>
+    <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>Aditya Das</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#answers">Answers</a></div>
+      <div class="nav__item"><a class="nav__link" href="#projects">Projects</a></div>
+      <div class="nav__item"><a class="nav__link" href="#approach">Approach</a></div>
+      <div class="nav__item"><a class="nav__link" href="#questions">Questions</a></div>
+      <div class="nav__item"><a class="nav__link" href="#work">Work</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--primary" href="#top" data-mic>Start talking</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--split" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <p class="hero__kicker"><span class="dot" aria-hidden="true"></span>Five questions ready, or ask your own</p>
+        <h1 id="hero-h">I’m Aditya Das. Ask me anything out loud.</h1>
+        <p class="hero__lead">Press the mic and talk, the way you would in an interview. I will answer back: backend systems in Dubai, refinery data in Abu Dhabi, security tooling for AI agents now. No sign-in, no setup, nothing to install.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="#top" data-mic>Start talking<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+          <a class="btn btn--secondary" href="#answers">Read the answers</a>
+        </div>
+      </div>
+      <div class="hero__media span-6 start-7">
+        <div class="ui ui-panel vb">
+          <div class="vb__top">
+            <span class="ui-chip ui-chip--ink" data-tier hidden></span>
+            <span class="ui-spacer"></span>
+            <span class="vb__status" data-status>Tap to talk</span>
+          </div>
+          <div class="vb__mid">
+            <button class="vb__orb" type="button" data-mic data-orb aria-pressed="false" aria-label="Ask a question">
+              <span class="vb__disc" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              </span>
+            </button>
+            <p class="vb__hint">Tap the mic and ask one question — it closes itself when you stop speaking. Tap again for the next one. Or tap a question below.</p>
+          </div>
+          <div class="vb__log" data-transcript role="log" aria-live="polite" aria-label="Conversation"></div>
+          <div class="vb__chips" data-chips>
+            <button type="button" data-question="What should we know about your life story?">Life story</button>
+            <button type="button" data-question="What's your #1 superpower?">Superpower</button>
+            <button type="button" data-question="What are the top 3 areas you'd like to grow in?">Growth areas</button>
+            <button type="button" data-question="What misconception do your coworkers have about you?">Misconception</button>
+            <button type="button" data-question="How do you push your boundaries and limits?">Pushing limits</button>
+          </div>
+          <form class="vb__ask" data-typed-form hidden>
+            <label class="sr-only" for="ask">Your question</label>
+            <input id="ask" type="text" data-typed-input autocomplete="off" placeholder="Type a question">
+            <button type="submit">Ask</button>
+          </form>
+          <details class="vb__limits">
+            <summary><span><b>About 20 spoken questions a day</b> — and it never dead-ends</span></summary>
+            <ul class="vb__tiers">
+              <li><span class="ui-chip ui-chip--live">Live</span><span>You speak, Aditya answers out loud, in real time. This is the normal experience.</span></li>
+              <li><span class="ui-chip ui-chip--ink">Backup</span><span>If the live connection can't start, your browser does the listening and speaking instead. Same answers, a moment slower.</span></li>
+              <li><span class="ui-chip ui-chip--plain">Prepared</span><span>If there's no connection, or the day's questions are used up, it answers from 45 written answers — still read out loud.</span></li>
+            </ul>
+            <p class="vb__reset">The free Gemini tier allows roughly twenty spoken questions per day, shared across everyone who visits, and it resets at midnight US Pacific. Whichever level you land on, you always get an answer — the page is built so a used-up quota degrades instead of breaking.</p>
+          </details>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section" id="answers" aria-labelledby="answers-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5"><h2 id="answers-h">The answers, written out</h2></div>
+        <div class="span-6 start-7 stack-4">
+          <p>Forty-five questions I have answers ready for. Open one to read it, or hand it to the voice and hear it instead — the voice re-words it live, so asking twice never returns the same recording. Anything else, ask in the box at the foot.</p>
+          <a class="link" href="#projects">See the projects</a>
+        </div>
+      </div>
+      <div class="ui app fill app--live" data-answers>
+        <div class="app__pane app__pane--list">
+          <div class="ui ui-panel ui-win">
+            <div class="ui-win__bar">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-win__crumb">Interview <i>/</i> <b>Prepared</b></span>
+              <span class="ui-spacer"></span>
+              <label class="ui-win__search">
+                <svg class="ui-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+                <span class="sr-only">Search the questions</span>
+                <input class="ui-win__inp" type="search" placeholder="Search" autocomplete="off" data-search>
+                <span class="ui-kbd" aria-hidden="true">/</span>
+              </label>
+            </div>
+            <div class="ui-win__body">
+              <nav class="ui-win__side" aria-label="Filter the questions">
+                <!-- answers:nav:start -->
+                <button class="ui-win__nav is-on" type="button" data-filter="all" aria-pressed="true"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M2.5 9h3l1 1.5h3l1-1.5h3"/><path d="M2.5 9 4 3.5h8L13.5 9v3.5h-11z"/></svg>All<em>45</em></button>
+                <button class="ui-win__nav" type="button" data-filter="group:Himself" aria-pressed="false"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="6" r="2.5"/><path d="M3.5 13.5c.6-2.3 2.4-3.5 4.5-3.5s3.9 1.2 4.5 3.5"/></svg>Himself<em>22</em></button>
+                <button class="ui-win__nav" type="button" data-filter="group:Work" aria-pressed="false"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>Work<em>11</em></button>
+                <button class="ui-win__nav" type="button" data-filter="group:Background" aria-pressed="false"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M2.5 6 8 3.5 13.5 6 8 8.5z"/><path d="M4.5 7.2v3.3c0 .8 1.6 1.5 3.5 1.5s3.5-.7 3.5-1.5V7.2"/></svg>Background<em>10</em></button>
+                <button class="ui-win__nav" type="button" data-filter="group:Contact" aria-pressed="false"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg>Contact<em>2</em></button>
+                <span class="ui-win__label">Topics</span>
+                <button class="ui-win__nav" type="button" data-filter="tag:career" aria-pressed="false"><span class="ui-win__hash" aria-hidden="true">#</span>Career<em>34</em></button>
+                <button class="ui-win__nav" type="button" data-filter="tag:agents" aria-pressed="false"><span class="ui-win__hash" aria-hidden="true">#</span>Agents<em>6</em></button>
+                <button class="ui-win__nav" type="button" data-filter="tag:backend" aria-pressed="false"><span class="ui-win__hash" aria-hidden="true">#</span>Backend<em>6</em></button>
+                <button class="ui-win__nav" type="button" data-filter="tag:security" aria-pressed="false"><span class="ui-win__hash" aria-hidden="true">#</span>Security<em>4</em></button>
+                <button class="ui-win__nav" type="button" data-filter="tag:data" aria-pressed="false"><span class="ui-win__hash" aria-hidden="true">#</span>Data<em>2</em></button>
+                <!-- answers:nav:end -->
+              </nav>
+              <div class="ui-win__main">
+                <div class="ui-win__cols" aria-hidden="true"><span>Topic</span><span>Question</span><span>Status</span><span>Words</span></div>
+                <div class="ui-win__rows" role="listbox" aria-label="Prepared questions" data-rows>
+                  <!-- answers:rows:start -->
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-story" aria-selected="false" aria-controls="ans-doc-story" data-row data-id="story" data-group="Himself" data-tags="career" data-q="What should we know about your life story?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">LS</span>
+                    <span class="ui-win__who">Life story</span>
+                    <span class="ui-win__sub">What should we know about your life story?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">123</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-superpower" aria-selected="false" aria-controls="ans-doc-superpower" data-row data-id="superpower" data-group="Himself" data-tags="security backend" data-q="What's your #1 superpower?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">SP</span>
+                    <span class="ui-win__who">Superpower</span>
+                    <span class="ui-win__sub">What's your #1 superpower?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">81</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-growth" aria-selected="false" aria-controls="ans-doc-growth" data-row data-id="growth" data-group="Himself" data-tags="career" data-q="What are the top 3 areas you'd like to grow in?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">GR</span>
+                    <span class="ui-win__who">Growth</span>
+                    <span class="ui-win__sub">What are the top 3 areas you'd like to grow in?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">77</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-strengths" aria-selected="false" aria-controls="ans-doc-strengths" data-row data-id="strengths" data-group="Himself" data-tags="career" data-q="What are your main strengths?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">SG</span>
+                    <span class="ui-win__who">Strengths</span>
+                    <span class="ui-win__sub">What are your main strengths?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">95</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-weaknesses" aria-selected="false" aria-controls="ans-doc-weaknesses" data-row data-id="weaknesses" data-group="Himself" data-tags="career" data-q="What's your biggest weakness?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">WK2</span>
+                    <span class="ui-win__who">Weaknesses</span>
+                    <span class="ui-win__sub">What's your biggest weakness?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">95</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-misconception" aria-selected="false" aria-controls="ans-doc-misconception" data-row data-id="misconception" data-group="Himself" data-tags="career" data-q="What misconception do your coworkers have about you?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">MC</span>
+                    <span class="ui-win__who">Misconception</span>
+                    <span class="ui-win__sub">What misconception do your coworkers have about you?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">87</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-limits" aria-selected="false" aria-controls="ans-doc-limits" data-row data-id="limits" data-group="Himself" data-tags="career" data-q="How do you push your boundaries and limits?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">LM</span>
+                    <span class="ui-win__who">Limits</span>
+                    <span class="ui-win__sub">How do you push your boundaries and limits?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">96</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-projects" aria-selected="false" aria-controls="ans-doc-projects" data-row data-id="projects" data-group="Work" data-tags="agents security" data-q="What project are you most proud of?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">PR</span>
+                    <span class="ui-win__who">Projects</span>
+                    <span class="ui-win__sub">What project are you most proud of?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">75</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-experience" aria-selected="false" aria-controls="ans-doc-experience" data-row data-id="experience" data-group="Work" data-tags="backend data" data-q="Where have you worked?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">WK</span>
+                    <span class="ui-win__who">Work</span>
+                    <span class="ui-win__sub">Where have you worked?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">69</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-sport" aria-selected="false" aria-controls="ans-doc-sport" data-row data-id="sport" data-group="Himself" data-tags="career" data-q="Do you play any sport?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">SR</span>
+                    <span class="ui-win__who">Sport</span>
+                    <span class="ui-win__sub">Do you play any sport?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">58</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-research" aria-selected="false" aria-controls="ans-doc-research" data-row data-id="research" data-group="Background" data-tags="data" data-q="Tell me about your research paper.">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">RS</span>
+                    <span class="ui-win__who">Research</span>
+                    <span class="ui-win__sub">Tell me about your research paper.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">47</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-stack" aria-selected="false" aria-controls="ans-doc-stack" data-row data-id="stack" data-group="Work" data-tags="backend" data-q="What's your stack?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">ST</span>
+                    <span class="ui-win__who">Stack</span>
+                    <span class="ui-win__sub">What's your stack?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">49</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-education" aria-selected="false" aria-controls="ans-doc-education" data-row data-id="education" data-group="Background" data-tags="career" data-q="What did you study?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">ED</span>
+                    <span class="ui-win__who">Education</span>
+                    <span class="ui-win__sub">What did you study?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">32</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-why" aria-selected="false" aria-controls="ans-doc-why" data-row data-id="why" data-group="Background" data-tags="backend career" data-q="Why should we hire you?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">WH</span>
+                    <span class="ui-win__who">Why him</span>
+                    <span class="ui-win__sub">Why should we hire you?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">62</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-ai" aria-selected="false" aria-controls="ans-doc-ai" data-row data-id="ai" data-group="Work" data-tags="agents" data-q="What's your experience with AI?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">AI</span>
+                    <span class="ui-win__who">AI</span>
+                    <span class="ui-win__sub">What's your experience with AI?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">62</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-location" aria-selected="false" aria-controls="ans-doc-location" data-row data-id="location" data-group="Background" data-tags="career" data-q="Where are you based, and are you open to remote?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">BA</span>
+                    <span class="ui-win__who">Based in</span>
+                    <span class="ui-win__sub">Where are you based, and are you open to remote?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">55</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-earlylife" aria-selected="false" aria-controls="ans-doc-earlylife" data-row data-id="earlylife" data-group="Background" data-tags="career" data-q="Where did you grow up?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">GU</span>
+                    <span class="ui-win__who">Growing up</span>
+                    <span class="ui-win__sub">Where did you grow up?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">70</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-status" aria-selected="false" aria-controls="ans-doc-status" data-row data-id="status" data-group="Contact" data-tags="career" data-q="What's your current situation and notice period?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">AV</span>
+                    <span class="ui-win__who">Availability</span>
+                    <span class="ui-win__sub">What's your current situation and notice period?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">40</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-whyleft" aria-selected="false" aria-controls="ans-doc-whyleft" data-row data-id="whyleft" data-group="Work" data-tags="career" data-q="Why did you leave Innov8?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">WL</span>
+                    <span class="ui-win__who">Why he left</span>
+                    <span class="ui-win__sub">Why did you leave Innov8?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">58</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-failure" aria-selected="false" aria-controls="ans-doc-failure" data-row data-id="failure" data-group="Himself" data-tags="career backend" data-q="Tell me about a time you failed.">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">FL</span>
+                    <span class="ui-win__who">A failure</span>
+                    <span class="ui-win__sub">Tell me about a time you failed.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">90</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-conflict" aria-selected="false" aria-controls="ans-doc-conflict" data-row data-id="conflict" data-group="Himself" data-tags="career security" data-q="How do you handle disagreement?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">DG</span>
+                    <span class="ui-win__who">Disagreement</span>
+                    <span class="ui-win__sub">How do you handle disagreement?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">89</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-criticism" aria-selected="false" aria-controls="ans-doc-criticism" data-row data-id="criticism" data-group="Himself" data-tags="career" data-q="How do you handle criticism of your work?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">CR</span>
+                    <span class="ui-win__who">Criticism</span>
+                    <span class="ui-win__sub">How do you handle criticism of your work?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">88</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-whyrole" aria-selected="false" aria-controls="ans-doc-whyrole" data-row data-id="whyrole" data-group="Background" data-tags="agents" data-q="Why do you want this role?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">WA</span>
+                    <span class="ui-win__who">Why agents</span>
+                    <span class="ui-win__sub">Why do you want this role?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">77</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-whyagents" aria-selected="false" aria-controls="ans-doc-whyagents" data-row data-id="whyagents" data-group="Work" data-tags="agents" data-q="What draws you to agent systems?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">WG</span>
+                    <span class="ui-win__who">Why agents</span>
+                    <span class="ui-win__sub">What draws you to agent systems?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">68</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-bestfit" aria-selected="false" aria-controls="ans-doc-bestfit" data-row data-id="bestfit" data-group="Background" data-tags="agents career" data-q="Why are you the best person for this role?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">BF</span>
+                    <span class="ui-win__who">Why him</span>
+                    <span class="ui-win__sub">Why are you the best person for this role?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">96</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-looking" aria-selected="false" aria-controls="ans-doc-looking" data-row data-id="looking" data-group="Background" data-tags="career" data-q="What are you looking for in your next role?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">LF</span>
+                    <span class="ui-win__who">Looking for</span>
+                    <span class="ui-win__sub">What are you looking for in your next role?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">73</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-personal" aria-selected="false" aria-controls="ans-doc-personal" data-row data-id="personal" data-group="Himself" data-tags="career" data-q="Tell me something about yourself that isn't on your resume.">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">OW</span>
+                    <span class="ui-win__who">Outside work</span>
+                    <span class="ui-win__sub">Tell me something about yourself that isn't on your resume.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">77</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-youtube" aria-selected="false" aria-controls="ans-doc-youtube" data-row data-id="youtube" data-group="Himself" data-tags="career" data-q="Tell me about the YouTube editing.">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">YT</span>
+                    <span class="ui-win__who">YouTube</span>
+                    <span class="ui-win__sub">Tell me about the YouTube editing.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">57</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-resume" aria-selected="false" aria-controls="ans-doc-resume" data-row data-id="resume" data-group="Work" data-tags="career" data-q="Walk me through your resume.">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">RE</span>
+                    <span class="ui-win__who">Resume</span>
+                    <span class="ui-win__sub">Walk me through your resume.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">82</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-whycs" aria-selected="false" aria-controls="ans-doc-whycs" data-row data-id="whycs" data-group="Background" data-tags="career" data-q="Why did you choose computer science?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">WC</span>
+                    <span class="ui-win__who">Why CS</span>
+                    <span class="ui-win__sub">Why did you choose computer science?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">77</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-pressure" aria-selected="false" aria-controls="ans-doc-pressure" data-row data-id="pressure" data-group="Himself" data-tags="career" data-q="How do you work under pressure and tight deadlines?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">PS</span>
+                    <span class="ui-win__who">Pressure</span>
+                    <span class="ui-win__sub">How do you work under pressure and tight deadlines?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">75</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-prioritise" aria-selected="false" aria-controls="ans-doc-prioritise" data-row data-id="prioritise" data-group="Himself" data-tags="career" data-q="How do you prioritise when everything is urgent?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">PQ</span>
+                    <span class="ui-win__who">Prioritising</span>
+                    <span class="ui-win__sub">How do you prioritise when everything is urgent?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">65</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-teamwork" aria-selected="false" aria-controls="ans-doc-teamwork" data-row data-id="teamwork" data-group="Himself" data-tags="career" data-q="Do you prefer working alone or on a team?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">TW</span>
+                    <span class="ui-win__who">Teamwork</span>
+                    <span class="ui-win__sub">Do you prefer working alone or on a team?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">77</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-learnfast" aria-selected="false" aria-controls="ans-doc-learnfast" data-row data-id="learnfast" data-group="Himself" data-tags="career" data-q="Tell me about a time you had to learn something quickly.">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">LQ</span>
+                    <span class="ui-win__who">Learning fast</span>
+                    <span class="ui-win__sub">Tell me about a time you had to learn something quickly.</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">79</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-ambiguity" aria-selected="false" aria-controls="ans-doc-ambiguity" data-row data-id="ambiguity" data-group="Himself" data-tags="career" data-q="How do you deal with ambiguity or unclear requirements?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">AM</span>
+                    <span class="ui-win__who">Ambiguity</span>
+                    <span class="ui-win__sub">How do you deal with ambiguity or unclear requirements?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">73</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-motivates" aria-selected="false" aria-controls="ans-doc-motivates" data-row data-id="motivates" data-group="Himself" data-tags="career" data-q="What motivates you?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">MO</span>
+                    <span class="ui-win__who">Motivation</span>
+                    <span class="ui-win__sub">What motivates you?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">71</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-manager" aria-selected="false" aria-controls="ans-doc-manager" data-row data-id="manager" data-group="Work" data-tags="career" data-q="What would your last manager say about you?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">MS</span>
+                    <span class="ui-win__who">Manager says</span>
+                    <span class="ui-win__sub">What would your last manager say about you?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">75</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-workstyle" aria-selected="false" aria-controls="ans-doc-workstyle" data-row data-id="workstyle" data-group="Himself" data-tags="career" data-q="How would you describe your working style?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">WS</span>
+                    <span class="ui-win__who">Work style</span>
+                    <span class="ui-win__sub">How would you describe your working style?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">68</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-dream" aria-selected="false" aria-controls="ans-doc-dream" data-row data-id="dream" data-group="Background" data-tags="career" data-q="What's your long-term ambition?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">AB</span>
+                    <span class="ui-win__who">Ambition</span>
+                    <span class="ui-win__sub">What's your long-term ambition?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">70</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-leadership" aria-selected="false" aria-controls="ans-doc-leadership" data-row data-id="leadership" data-group="Himself" data-tags="career" data-q="Do you have leadership experience?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">LD</span>
+                    <span class="ui-win__who">Leadership</span>
+                    <span class="ui-win__sub">Do you have leadership experience?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">72</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-security" aria-selected="false" aria-controls="ans-doc-security" data-row data-id="security" data-group="Work" data-tags="security" data-q="Why do you care so much about security?">
+                    <span class="ui-avatar" data-tone="1" aria-hidden="true">SC</span>
+                    <span class="ui-win__who">Security</span>
+                    <span class="ui-win__sub">Why do you care so much about security?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">74</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-testing" aria-selected="false" aria-controls="ans-doc-testing" data-row data-id="testing" data-group="Work" data-tags="backend" data-q="How do you think about testing?">
+                    <span class="ui-avatar" data-tone="2" aria-hidden="true">TS</span>
+                    <span class="ui-win__who">Testing</span>
+                    <span class="ui-win__sub">How do you think about testing?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">62</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-thisbot" aria-selected="false" aria-controls="ans-doc-thisbot" data-row data-id="thisbot" data-group="Work" data-tags="agents" data-q="How did you build this voice bot?">
+                    <span class="ui-avatar" data-tone="3" aria-hidden="true">TB</span>
+                    <span class="ui-win__who">This bot</span>
+                    <span class="ui-win__sub">How did you build this voice bot?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">90</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-keepup" aria-selected="false" aria-controls="ans-doc-keepup" data-row data-id="keepup" data-group="Himself" data-tags="career" data-q="How do you keep up with new technology?">
+                    <span class="ui-avatar" data-tone="4" aria-hidden="true">KU</span>
+                    <span class="ui-win__who">Keeping up</span>
+                    <span class="ui-win__sub">How do you keep up with new technology?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">67</span>
+                  </button>
+                  <button class="ui-win__row" type="button" role="option" id="ans-row-contact" aria-selected="false" aria-controls="ans-doc-contact" data-row data-id="contact" data-group="Contact" data-tags="career" data-q="How can I reach you?">
+                    <span class="ui-avatar" data-tone="5" aria-hidden="true">CT</span>
+                    <span class="ui-win__who">Contact</span>
+                    <span class="ui-win__sub">How can I reach you?</span>
+                    <span class="ui-win__st" data-st>Ready</span>
+                    <span class="ui-win__age">27</span>
+                  </button>
+                <!-- answers:rows:end -->
+                </div>
+                <p class="ui-win__empty" data-empty hidden>No prepared question matches that. Ask it out loud instead — he answers live.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app__pane app__pane--open">
+          <div class="ui ui-panel ui-chat">
+            <div class="ui-head">
+              <button class="ans__back" type="button" data-back aria-label="Back to the questions"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9.5 3.5 5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <span class="ui-agent" aria-hidden="true"></span>
+              <div class="ui-title">Aditya Das</div>
+              <span class="ui-chat__online" data-panel-status>Written answers</span>
+              <span class="ui-spacer"></span>
+            </div>
+            <div class="ui-chat__body" data-body>
+              <!-- answers:docs:start -->
+              <article class="ans-doc" id="ans-doc-story" data-doc="story" aria-labelledby="ans-row-story">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What should we know about your life story?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I was born in Ranchi, and we moved to the UAE when I was five, so I actually grew up in Abu Dhabi and did all my schooling there — Asian International School in Ruwais, right through twelfth. Two things stuck from early on: football, which I still play, and computers. I came back to India for my B.Tech at SRM in Chennai, and that's where AI really got me — I ended up publishing a paper comparing five deep learning architectures for spotting lung cancer in CT scans. Since then it's been an internship at ADNOC Refining in Abu Dhabi, a stint at Innov8 in Dubai owning payroll and access control, and now I'm in Bangalore building security tooling for AI agents.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What should we know about your life story?">Ask this out loud</button>
+                      <span class="ans-doc__meta">123 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-superpower" data-doc="superpower" aria-labelledby="ans-row-superpower">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your #1 superpower?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I pick things up fast. Hand me something I've never touched and I'll be useful with it in about a day — that's how I went from not knowing NestJS to owning a payroll module and a 299-permission access layer, and from not knowing LangGraph to shipping two agents, inside roughly a year. The part that makes it work is that I'm comfortable being the person in the room who doesn't know yet, so I ask early instead of quietly flailing.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your #1 superpower?">Ask this out loud</button>
+                      <span class="ans-doc__meta">81 words · #security · #backend</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-growth" data-doc="growth" aria-labelledby="ans-row-growth">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What are the top 3 areas you'd like to grow in?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Leadership, first. I want to run teams, not just ship my piece — own the operational side and actually help scale something. Second, public speaking. I'm fine one-to-one or with another engineer, but my presence drops in front of a big or cross-functional room, and I'm working on that deliberately. Third, going deeper technically rather than wider — I've covered a lot of ground quickly and I want more depth in the systems I keep reaching for.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What are the top 3 areas you'd like to grow in?">Ask this out loud</button>
+                      <span class="ans-doc__meta">77 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-strengths" data-doc="strengths" aria-labelledby="ans-row-strengths">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What are your main strengths?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Four, honestly. I learn new tools fast — I've picked up LangGraph, pgvector, MCP and Cloudflare Workers inside real projects rather than tutorials. I'm good with deadlines; I deliver when I said I would, and this bot going out in a day is the most recent proof. I work well in a team and I think I lift the people around me — I end up being the one who unblocks others. And communication: I can explain a technical trade-off to someone who doesn't share my context and have them actually walk away with it.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What are your main strengths?">Ask this out loud</button>
+                      <span class="ans-doc__meta">95 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-weaknesses" data-doc="weaknesses" aria-labelledby="ans-row-weaknesses">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your biggest weakness?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Saying no is the big one — I've overcommitted because I wanted to be useful. Now I make myself check what's actually on my plate before I answer. I also used to refuse to ask for help, which was just slow; I've got a rule now that if I'm stuck for forty-five minutes I go and ask. And I'm soft-spoken, so I used to dodge giving direct criticism, which isn't fair on the other person. I handle that by talking about the behaviour rather than them, and framing it as a problem we're solving together.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your biggest weakness?">Ask this out loud</button>
+                      <span class="ans-doc__meta">95 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-misconception" data-doc="misconception" aria-labelledby="ans-row-misconception">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What misconception do your coworkers have about you?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">That I'm unapproachable. I go quite deep into whatever I'm working on, and apparently from the outside that reads as &quot;don't bother him&quot;. It's not that at all — once people have worked with me for a week they find I'm pretty open and I like the collaborative part. The other version of it is people assuming I have no life outside work because I care a lot about getting the quality right. I just hold a high bar during work hours; outside them I'm playing football.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What misconception do your coworkers have about you?">Ask this out loud</button>
+                      <span class="ans-doc__meta">87 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-limits" data-doc="limits" aria-labelledby="ans-row-limits">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you push your boundaries and limits?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I strategize rather than just grind. Mostly it comes down to deliberately choosing the uncomfortable option: I take on the thing I don't know how to finish yet, and I do it in small repeatable steps so the fear wears off instead of building up. I try to treat mistakes as data rather than proof I can't do it. And I only push where it serves a real goal — I'm not chasing stress for its own sake. The main thing I've learned is to act before I feel ready, because the comfort never arrives first.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you push your boundaries and limits?">Ask this out loud</button>
+                      <span class="ans-doc__meta">96 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-projects" data-doc="projects" aria-labelledby="ans-row-projects">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What project are you most proud of?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">MCP-Hardener, easily. It's a seven-package TypeScript monorepo that turns an OpenAPI spec into a hardened MCP server for AI agents — read-only by default, writes held behind a single-use approval bound to a hash of the exact arguments, tenant IDs stripped from anything the agent can see. There's a gateway that enforces the same rules on third-party servers, and a scanner that fails the build on high-severity findings. About 350 tests. It's live at hardened-mcp.mcphardener.workers.dev.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What project are you most proud of?">Ask this out loud</button>
+                      <span class="ans-doc__meta">75 words · #agents · #security</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-experience" data-doc="experience" aria-labelledby="ans-row-experience">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Where have you worked?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Two places that mattered. ADNOC Refining in Abu Dhabi, Dec 2025 into Jan 2026, where I built Python ETL pipelines that pulled legacy refinery logs into a warehouse and cut about twenty hours a week of manual work. Then Innov8 Soft Technologies in Dubai, September to October 2026, where I owned payroll, notifications and access control on a multi-tenant HR SaaS — including a 299-permission layer across 380-plus endpoints.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Where have you worked?">Ask this out loud</button>
+                      <span class="ans-doc__meta">69 words · #backend · #data</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-sport" data-doc="sport" aria-labelledby="ans-row-sport">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Do you play any sport?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Football, mostly — I've played it since I was a kid and I still do. I watch a lot of sport generally. Beyond that I read about whatever's coming next in tech, which is less of a hobby and more of a problem. Long term I'd like to start a business of my own that solves something real.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Do you play any sport?">Ask this out loud</button>
+                      <span class="ans-doc__meta">58 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-research" data-doc="research" aria-labelledby="ans-row-research">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Tell me about your research paper.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">At SRM I published a comparative study of five deep learning architectures — AlexNet, VGG16, ResNet, DenseNet and U-Net — for detecting lung cancer in CT scans. It's what pulled me properly into AI rather than just backend work. The code is on my GitHub under Lung-Cancer-Analysis.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Tell me about your research paper.">Ask this out loud</button>
+                      <span class="ans-doc__meta">47 words · #data</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-stack" data-doc="stack" aria-labelledby="ans-row-stack">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your stack?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">TypeScript and Python are home. On the backend, NestJS and FastAPI with PostgreSQL, TypeORM or SQLAlchemy, and a lot of attention to access control and multi-tenancy. React and Next.js on the front. Docker everywhere, Kubernetes where it earns it. And on the AI side, provider APIs, RAG and LangGraph.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your stack?">Ask this out loud</button>
+                      <span class="ans-doc__meta">49 words · #backend</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-education" data-doc="education" aria-labelledby="ans-row-education">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What did you study?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">B.Tech in Computer Science at SRM in Chennai, 2022 to 2026, CGPA 8.13. Before that I was in Abu Dhabi — Asian International School in Ruwais, CBSE all the way through twelfth.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What did you study?">Ask this out loud</button>
+                      <span class="ans-doc__meta">32 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-why" data-doc="why" aria-labelledby="ans-row-why">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why should we hire you?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Because I learn fast and I finish. Drop me into something I've never used and I'll be shipping in it within a day — that's how I went from zero NestJS to owning a payroll system. And I ship the part most people skip: the migration that's safe to run twice, the permission that can't be bypassed, the tests that prove it.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why should we hire you?">Ask this out loud</button>
+                      <span class="ans-doc__meta">62 words · #backend · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-ai" data-doc="ai" aria-labelledby="ans-row-ai">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your experience with AI?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Mostly the engineering around models. At Innov8 I co-built a multi-provider layer across OpenAI, Anthropic, Gemini, Mistral and DeepSeek with streaming and schema-structured output, plus per-tenant cost metering so no tenant could spend against another. On my own: KubeMedic, a five-node LangGraph agent that turns Kubernetes crash logs into remediation guides, and MCP-Hardener, which is about making agent tooling safe by construction.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your experience with AI?">Ask this out loud</button>
+                      <span class="ans-doc__meta">62 words · #agents</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-location" data-doc="location" aria-labelledby="ans-row-location">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Where are you based, and are you open to remote?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I'm in Bangalore, India. I grew up in Abu Dhabi, did my degree in Chennai, and worked in Dubai and Abu Dhabi, so I've moved around a fair bit and I'm genuinely flexible — remote, hybrid or in an office all work for me, and I'm happy to overlap with whatever hours the team needs.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Where are you based, and are you open to remote?">Ask this out loud</button>
+                      <span class="ans-doc__meta">55 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-earlylife" data-doc="earlylife" aria-labelledby="ans-row-earlylife">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Where did you grow up?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I was born in Ranchi, in Jharkhand, and moved to the UAE when I was five, so I grew up in Abu Dhabi. All my schooling was at Asian International School in Ruwais, CBSE, right through 12th — 82.4 in 10th and 75.4 in 12th. Then I came back to India for my B.Tech at SRM Kattankulathur. Football and technology were the two things that stuck the whole way through.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Where did you grow up?">Ask this out loud</button>
+                      <span class="ans-doc__meta">70 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-status" data-doc="status" aria-labelledby="ans-row-status">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your current situation and notice period?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I'm looking for work at the moment, so there's no notice period — I can start immediately. I'm flexible on the arrangement too: remote, hybrid or onsite all work for me. On compensation, I'd happily discuss that with you personally.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your current situation and notice period?">Ask this out loud</button>
+                      <span class="ans-doc__meta">40 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-whyleft" data-doc="whyleft" aria-labelledby="ans-row-whyleft">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why did you leave Innov8?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">It was a contractual role, and when it came up for renewal the next contract required signing a two-year bond. I wasn't willing to tie myself down for two years, so I finished the contract and moved on. The work itself went well — I owned payroll, notifications and access control end to end while I was there.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why did you leave Innov8?">Ask this out loud</button>
+                      <span class="ans-doc__meta">58 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-failure" data-doc="failure" aria-labelledby="ans-row-failure">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Tell me about a time you failed.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">On the payroll work I shipped the month-lock on creating records but not on editing them, so a processed payroll month was closed to new entries and still quietly editable. The frozen payslips meant no money was wrong, but the live records and the snapshot could drift — exactly the class of bug I'd said I was there to prevent. I found it by probing a processed run rather than by reading the code, and that's the real lesson: I assume a guard I haven't attacked isn't a guard yet.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Tell me about a time you failed.">Ask this out loud</button>
+                      <span class="ans-doc__meta">90 words · #career · #backend</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-conflict" data-doc="conflict" aria-labelledby="ans-row-conflict">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you handle disagreement?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I try to turn it into a question about consequences rather than taste. On the HR product I wanted platform-admin accounts creatable only by hand, against the database — no endpoint, no seeder — and that's less convenient, so it needed defending. The argument that worked wasn't &quot;it's safer&quot;, it was &quot;any code path in the running app that can mint a super admin is an escalation path for anyone who reaches it&quot;. When someone pushes back and they're right, I'd rather change my mind fast and say so.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you handle disagreement?">Ask this out loud</button>
+                      <span class="ans-doc__meta">89 words · #career · #security</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-criticism" data-doc="criticism" aria-labelledby="ans-row-criticism">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you handle criticism of your work?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I try to treat it as data rather than a verdict — if someone's right, changing my mind quickly is cheaper than defending a position I've stopped believing. Code review is the easy version and I want more of it; I've been building mostly alone, and a team that catches me is one of the things I'm looking for. Giving criticism was the harder direction for me — I used to avoid it, which didn't help anyone, so now I talk about the behaviour rather than the person.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you handle criticism of your work?">Ask this out loud</button>
+                      <span class="ans-doc__meta">88 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-whyrole" data-doc="whyrole" aria-labelledby="ans-row-whyrole">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why do you want this role?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Because the interesting problem right now isn't the model, it's everything we hand the model. I spent the last year on that plumbing — a multi-provider LLM layer with structured output and per-tenant cost controls, a LangGraph agent for Kubernetes incidents, and then MCP-Hardener, which exists because connecting an agent to a tool server is a one-liner and what it gets is usually completely unguarded. It's backend engineering with real consequences, which is what I'm good at.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why do you want this role?">Ask this out loud</button>
+                      <span class="ans-doc__meta">77 words · #agents</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-whyagents" data-doc="whyagents" aria-labelledby="ans-row-whyagents">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What draws you to agent systems?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Connecting an agent to a tool server is a one-liner, and what it gets back is usually completely unguarded — delete is as reachable as read, and a tool's description is read by the model as instructions. That gap is the thing I keep coming back to, and it's why I built MCP-Hardener. It's a security problem and a plumbing problem at the same time, which suits me.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What draws you to agent systems?">Ask this out loud</button>
+                      <span class="ans-doc__meta">68 words · #agents</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-bestfit" data-doc="bestfit" aria-labelledby="ans-row-bestfit">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why are you the best person for this role?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Because the gap on most agent teams is the engineering around the model, and that's what I've been doing. A multi-provider LLM layer with streaming and schema-structured output, a LangGraph agent turning Kubernetes crash logs into remediation guides, and MCP-Hardener. I also bring the boring strengths: a 299-permission layer across 380-plus endpoints, a migration safe to re-run before a 14,000-user cutover, 350-plus tests on my own project with nobody making me. And I'm available immediately, happy fully remote, and fast — I hadn't used the Gemini Live API or Cloudflare Workers before I built this bot.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why are you the best person for this role?">Ask this out loud</button>
+                      <span class="ans-doc__meta">96 words · #agents · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-looking" data-doc="looking" aria-labelledby="ans-row-looking">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What are you looking for in your next role?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Agent and LLM systems, with real users on the other end, and people who are better than me at it. I've been building this kind of thing mostly alone on my own time, and the thing I'm missing is a team with a higher bar than mine — code review that catches me, and systems under real load. I'd also like to own something end to end rather than a slice of it.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What are you looking for in your next role?">Ask this out loud</button>
+                      <span class="ans-doc__meta">73 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-personal" data-doc="personal" aria-labelledby="ans-row-personal">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Tell me something about yourself that isn't on your resume.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I play football — have done since I was a kid — and I watch a lot of sport generally. I follow new technology closely, probably more than is healthy. For a while I edited video for a YouTube channel that got past five thousand subscribers, which taught me more about holding someone's attention than any amount of writing did. And the long-term thing I want is to build a self-sufficient business that solves a real problem.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Tell me something about yourself that isn't on your resume.">Ask this out loud</button>
+                      <span class="ans-doc__meta">77 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-youtube" data-doc="youtube" aria-labelledby="ans-row-youtube">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Tell me about the YouTube editing.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I edited video for a YouTube channel that grew past five thousand subscribers. It taught me more about holding someone's attention than any amount of writing did — if the first few seconds don't land, nothing after them matters. I use that more than I expected to when deciding what to put in front of someone first.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Tell me about the YouTube editing.">Ask this out loud</button>
+                      <span class="ans-doc__meta">57 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-resume" data-doc="resume" aria-labelledby="ans-row-resume">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Walk me through your resume.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Quickly: B.Tech in computer science at SRM Kattankulathur, 2022 to 2026, CGPA 8.13. Then an internship at ADNOC Refining in Abu Dhabi, building Python ETL for refinery logs and cutting about twenty hours a week of manual work. Then Innov8 Soft Technologies in Dubai, where I owned payroll, notifications and role-based access control on a multi-tenant HR SaaS — a 299-permission layer across 380-plus endpoints. Alongside that, projects of my own: a LangGraph ETL pipeline, KubeMedic, and MCP-Hardener, which I'm on now.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Walk me through your resume.">Ask this out loud</button>
+                      <span class="ans-doc__meta">82 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-whycs" data-doc="whycs" aria-labelledby="ans-row-whycs">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why did you choose computer science?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Tech was the thing I kept coming back to as a kid in Abu Dhabi, long before it was a career plan, and computer science was the version of that I could go and study. The part I didn't expect was AI — that got hold of me at university, to the point where I published a research paper on detecting lung cancer from CT scans with deep learning. Everything I've chosen since has pointed that way.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why did you choose computer science?">Ask this out loud</button>
+                      <span class="ans-doc__meta">77 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-pressure" data-doc="pressure" aria-labelledby="ans-row-pressure">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you work under pressure and tight deadlines?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Deadlines are honestly where I'm at my best — I'd rather have a date than an open-ended brief. This bot is the recent example: a day to build it, including two APIs I'd never touched. The way I handle it is to get something working end to end badly first, then make it good, so there's always something shippable. What I've learned not to do is quietly absorb more scope while the date stays fixed.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you work under pressure and tight deadlines?">Ask this out loud</button>
+                      <span class="ans-doc__meta">75 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-prioritise" data-doc="prioritise" aria-labelledby="ans-row-prioritise">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you prioritise when everything is urgent?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I look at what actually breaks if it slips, and what blocks someone else — the thing another person is waiting on goes first, because my delay becomes their delay. Then I'm honest about bandwidth instead of agreeing to everything. That's something I've had to learn: I used to say yes reflexively and overcommit, so now I check what's already on the list before answering.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you prioritise when everything is urgent?">Ask this out loud</button>
+                      <span class="ans-doc__meta">65 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-teamwork" data-doc="teamwork" aria-labelledby="ans-row-teamwork">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Do you prefer working alone or on a team?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">A team, and I think I'm good in one — I tend to end up as the person who unblocks other people, so the team's output goes up more than mine does. I can go heads-down when something needs deep focus, and most of my own projects were built that way. But doing it entirely alone is what I'm trying to get away from; what I want next is a team with a higher bar than mine.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Do you prefer working alone or on a team?">Ask this out loud</button>
+                      <span class="ans-doc__meta">77 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-learnfast" data-doc="learnfast" aria-labelledby="ans-row-learnfast">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Tell me about a time you had to learn something quickly.</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">This bot, honestly. I had a day, and I'd never used the Gemini Live API or Cloudflare Workers — so I built the simplest thing that could speak, then layered on the WebSocket proxy, the barge-in and the fallbacks. Before that it was LangGraph for KubeMedic and the MCP spec for MCP-Hardener, both picked up inside a real project rather than a tutorial. Having something that has to work by a date is what makes it stick for me.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Tell me about a time you had to learn something quickly.">Ask this out loud</button>
+                      <span class="ans-doc__meta">79 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-ambiguity" data-doc="ambiguity" aria-labelledby="ans-row-ambiguity">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you deal with ambiguity or unclear requirements?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">I ask the question that changes the answer, and I don't ask the rest. Usually that's about consequences — what happens if this runs twice, who's allowed to call this, what the number means when the data is missing. Where I can't get an answer I pick the safer reading, build it, and say out loud what I assumed so it's easy to correct. Waiting for perfect clarity just moves the risk later.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you deal with ambiguity or unclear requirements?">Ask this out loud</button>
+                      <span class="ans-doc__meta">73 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-motivates" data-doc="motivates" aria-labelledby="ans-row-motivates">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What motivates you?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Building something that solves a real problem for someone, and that holds up. The unglamorous half is what I actually enjoy — the migration you can safely run twice, the permission check nobody can skip. The long-term version is that I want to build a self-sufficient business that solves a real problem in the world, so working on things that matter to the people using them is the practice for that.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What motivates you?">Ask this out loud</button>
+                      <span class="ans-doc__meta">71 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-manager" data-doc="manager" aria-labelledby="ans-row-manager">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What would your last manager say about you?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">That I deliver when I said I would, and that I own the thing rather than the ticket — at Innov8 I had payroll, notifications and access control end to end and nobody had to chase me. I think they'd also say I go quiet when I'm deep in something, which reads as unapproachable until you know me. And probably that I'd rather raise the awkward question about permissions early than discover it in production.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What would your last manager say about you?">Ask this out loud</button>
+                      <span class="ans-doc__meta">75 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-workstyle" data-doc="workstyle" aria-labelledby="ans-row-workstyle">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How would you describe your working style?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Deep focus in long blocks, and a bias towards getting something running early so there's a real thing to argue about. I write tests as I go — 350-plus on my own project — because it's how I know the claim is true. I like owning a whole slice end to end. And I'd rather over-communicate the assumption I made than have someone find it a week later.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How would you describe your working style?">Ask this out loud</button>
+                      <span class="ans-doc__meta">68 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-dream" data-doc="dream" aria-labelledby="ans-row-dream">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">What's your long-term ambition?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Two things. I want to grow into leading teams — broader operational strategy, helping scale a business, not just the code inside it. And the longer-term dream is to build a self-sufficient business that solves a real problem in the world, something that stands on its own rather than a startup for its own sake. The nearer step is deeper ownership and getting properly good in front of a room.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="What's your long-term ambition?">Ask this out loud</button>
+                      <span class="ans-doc__meta">70 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-leadership" data-doc="leadership" aria-labelledby="ans-row-leadership">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Do you have leadership experience?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Not formally managing anyone yet, and I'd rather say that straight. What I have is ownership — at Innov8 I ran payroll, notifications and access control end to end, decided how the permission model worked, and defended those calls. Leading teams is exactly where I want to grow next, along with being better in front of larger, cross-functional groups. So it's an honest gap and a deliberate direction, not something I'm claiming.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Do you have leadership experience?">Ask this out loud</button>
+                      <span class="ans-doc__meta">72 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-security" data-doc="security" aria-labelledby="ans-row-security">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">Why do you care so much about security?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Because discipline doesn't hold at three in the morning, and systems shouldn't depend on it. Working on payroll made that concrete — people get paid from that code. With agents it's sharper: handing an agent a tool server is a one-liner, and what it gets is usually completely unguarded, where delete is as reachable as read. I'd rather the blast radius be a property of the configuration than of the upstream author's good intentions.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="Why do you care so much about security?">Ask this out loud</button>
+                      <span class="ans-doc__meta">74 words · #security</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-testing" data-doc="testing" aria-labelledby="ans-row-testing">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you think about testing?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Tests are how I earn the right to claim something works. MCP-Hardener has 350-plus and nobody was making me write one. The ETL pipeline has twenty-five that run with no database and no API key, so they actually get run. I also trust probing over reading — the payroll month-lock bug I found by attacking a processed run, not by reviewing code.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you think about testing?">Ask this out loud</button>
+                      <span class="ans-doc__meta">62 words · #backend</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-thisbot" data-doc="thisbot" aria-labelledby="ans-row-thisbot">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How did you build this voice bot?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Three tiers, so it can't dead-end on you. Tier one is the Gemini Live API over a WebSocket — mic in, spoken audio out, with barge-in. If that can't start, tier two uses the browser's own speech recognition and synthesis around a text model. If there's no network, tier three answers from a prepared bank. The key bit is that the browser never holds the API key: a Cloudflare Worker proxies the socket and sends the setup frame itself, so the persona can't be swapped by editing the page's JavaScript.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How did you build this voice bot?">Ask this out loud</button>
+                      <span class="ans-doc__meta">90 words · #agents</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-keepup" data-doc="keepup" aria-labelledby="ans-row-keepup">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How do you keep up with new technology?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">By building with it — reading about something doesn't stick for me. MCP is the clearest case: the spec was new, so I went and built a hardening layer for it and found out where it's weak. Otherwise I follow it fairly closely out of genuine interest; upcoming tech is what I read about for fun. But the filter is whether I can make something with it.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How do you keep up with new technology?">Ask this out loud</button>
+                      <span class="ans-doc__meta">67 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+              <article class="ans-doc" id="ans-doc-contact" data-doc="contact" aria-labelledby="ans-row-contact">
+                <div class="ui-msg ui-msg--me"><span class="ui-msg__text">How can I reach you?</span></div>
+                <div class="ui-msg ui-msg--bot">
+                  <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                  <span class="ui-msg__col">
+                    <span class="ui-chat__answer">Easiest is email — adityadurjay at gmail dot com. I'm on LinkedIn as das-aditya and GitHub as aoutix, and the projects I've talked about are up there.</span>
+                    <span class="ans-doc__foot">
+                      <button class="ans-doc__say" type="button" data-say="How can I reach you?">Ask this out loud</button>
+                      <span class="ans-doc__meta">27 words · #career</span>
+                    </span>
+                  </span>
+                </div>
+              </article>
+                <!-- answers:docs:end -->
+              <div class="ans-thread" data-thread role="log" aria-live="polite" aria-label="Live answers"></div>
+            </div>
+            <form class="ui-chat__input" data-ask-form>
+              <label class="sr-only" for="ans-ask">Ask him something</label>
+              <input class="ui-chat__inp" id="ans-ask" type="text" placeholder="Ask him something" autocomplete="off" data-ask-input>
+              <button class="ui-chat__send" type="submit" aria-label="Send"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 13V3.5M3.8 7.5 8 3.3l4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="projects" style="--hm: 2" aria-labelledby="projects-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="projects-h">Projects</h2>
+      </div>
+      <div class="grid">
+        <article class="card card--row card--open span-4">
+          <h3>MCP-Hardener guards agent tools</h3>
+          <p>Turns an OpenAPI spec into an MCP server an agent cannot misuse: read-only by default, writes held for a single-use approval.</p>
+          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj" data-ui-loop>
+<div class="ui ui-panel ui-code" data-ui="code">
+                <div class="ui-code__tabs">
+                  <span class="ui-code__tab is-on"><i class="ui-code__lang">TS</i>policy.ts</span>
+                  <span class="ui-code__tab"><i class="ui-code__lang">TS</i>gateway.ts</span>
+                  <span class="ui-spacer"></span>
+                  <span class="ui-chip ui-chip--plain ui-code__chip" data-code-chip>10 rules</span>
+                </div>
+                <pre class="ui-code__pre"><code><span class="ui-code__ln" data-n="24"><span class="k">export function</span> <span class="f">guard</span>(tool, args) {</span>
+<span class="ui-code__ln" data-n="25" data-note="Reads never need approval.">  <span class="k">if</span> (tool.read) <span class="k">return</span> <span class="f">ok</span>();</span>
+<span class="ui-code__ln is-mark" data-n="26">  <span class="k">const</span> h = <span class="f">sha256</span>(args);</span>
+<span class="ui-code__ln" data-n="27">  <span class="c">// one approval, one call</span></span>
+<span class="ui-code__ln" data-n="28" data-note="A changed argument needs a new approval.">  <span class="k">return</span> <span class="f">claim</span>(tool.id, h);</span>
+<span class="ui-code__ln" data-n="29">}</span></code></pre>
+                <div class="ui-code__hint" data-code-hint><span class="ui-dot"></span><span data-code-text>Tenant ids never reach the agent.</span></div>
+              </div>
+          </div></div></div>
+        </article>
+        <article class="card card--row card--open span-4">
+          <h3>KubeMedic reads crash logs</h3>
+          <p>A five-node LangGraph agent that turns Kubernetes crash logs into a remediation guide, in place of half an hour of correlation.</p>
+          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj">
+<div class="ui ui-panel ui-term" data-ui="terminal-run">
+                <div class="ui-term__head">
+                  <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span class="ui-term__title">kubemedic</span>
+                  <span class="ui-meta">zsh</span>
+                  <span class="ui-spacer"></span>
+                  <span class="ui-chip ui-chip--plain ui-term__branch">main</span>
+                </div>
+                <div class="ui-term__screen" data-term-screen>
+                  <div class="ui-term__track" data-term-track>
+                    <div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~/<span class="ui-term__up">kube</span>medic</span><span class="ui-term__sig">$</span><span class="ui-term__typed" data-term-cmd>kubemedic explain pod/api</span></div>
+                    <div class="ui-term__ln ui-term__meter" data-term-out data-term-meter><span class="ui-term__bar" style="--p:1"><i></i></span><span class="ui-term__count" data-term-count>5 of 5 nodes</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">collect events</span><span class="ui-term__n">212 lines</span><span class="ui-term__t">310ms</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">retrieve runbooks</span><span class="ui-term__n">pgvector</span><span class="ui-term__t">486ms</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">correlate restarts</span><span class="ui-term__n">4 signals</span><span class="ui-term__t">120ms</span></div>
+                    <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">write guide</span><span class="ui-term__n">6 steps</span><span class="ui-term__t">1.04s</span></div>
+                    <div class="ui-term__ln ui-term__gap" data-term-out aria-hidden="true"></div>
+                    <div class="ui-term__ln ui-term__sum" data-term-out><span class="ui-term__key">Cause</span><span class="ui-term__val">OOMKilled</span><span class="ui-term__dim">(limit 256Mi)</span></div>
+                    <div class="ui-term__ln ui-term__done" data-term-out data-term-done><span class="ui-term__ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.3 2.4 2.4 4.6-5"/></svg></span><b>Guide ready</b><span class="ui-term__dim">in 2.1s</span></div>
+                    <div class="ui-term__ln ui-term__cmd" data-term-next><span class="ui-term__cwd">~/<span class="ui-term__up">kube</span>medic</span><span class="ui-term__sig">$</span><span class="ui-term__typed"></span><i class="ui-term__caret" aria-hidden="true"></i></div>
+                  </div>
+                </div>
+              </div>
+          </div></div></div>
+        </article>
+        <article class="card card--row card--open span-4">
+          <h3>The ETL pipeline holds bad rows</h3>
+          <p>Unrecoverable records go to a Postgres dead-letter queue and the batch finishes, behind idempotent validated upserts.</p>
+          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj">
+<div class="ui ui-panel ui-pipe" data-ui="pipeline-board">
+                <div class="ui-pipe__head">
+                  <svg class="ui-icon ui-pipe__branch" viewBox="0 0 16 16" aria-hidden="true"><circle cx="4.5" cy="3.5" r="1.5"/><circle cx="4.5" cy="12.5" r="1.5"/><circle cx="11.5" cy="5" r="1.5"/><path d="M4.5 5v6M11.5 6.5c0 2.6-2.2 3.6-5.6 4.6"/></svg>
+                  <span class="ui-pipe__repo">etl/nightly</span><i class="ui-pipe__slash">/</i><code class="ui-pipe__ref">main</code>
+                  <span class="ui-pipe__run">#412</span>
+                  <span class="ui-spacer"></span>
+                  <span class="ui-pipe__total"><span data-pipe-total>2m 04s</span></span>
+                  <span class="ui-chip ui-chip--ink ui-chip--live ui-pipe__chip" data-pipe-chip data-done="Passed">Running</span>
+                </div>
+                <div class="ui-pipe__commit">
+                  <span class="ui-avatar" data-tone="4">AD</span>
+                  <span class="ui-pipe__msg">Hold bad rows, finish the batch</span>
+                  <code class="ui-pipe__sha">c71b40d</code>
+                  <button class="ui-btn ui-btn--ghost ui-btn--sm ui-pipe__btn" type="button" tabindex="-1" data-pipe-btn data-done="Re-run">Cancel</button>
+                </div>
+                <ol class="ui-pipe__steps">
+                  <li class="ui-pipe__step is-done" data-step="extract"><span class="ui-pipe__ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-pipe__name"><span class="ui-pipe__nm">Extract</span></span><code class="ui-pipe__cmd">read 41,200 rows</code><span class="ui-pipe__time" data-time>12s</span><span class="ui-pipe__bar"><i></i></span></li>
+                  <li class="ui-pipe__step is-done" data-step="validate"><span class="ui-pipe__ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-pipe__name"><span class="ui-pipe__nm">Validate</span></span><code class="ui-pipe__cmd">pydantic models</code><span class="ui-pipe__time" data-time>26s</span><span class="ui-pipe__bar"><i></i></span></li>
+                  <li class="ui-pipe__step is-run" data-step="upsert" style="--k:0.6"><span class="ui-pipe__ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-pipe__name"><span class="ui-pipe__nm">Upsert</span></span><code class="ui-pipe__cmd">idempotent</code><span class="ui-pipe__time" data-time="1m 09s">44s</span><span class="ui-pipe__bar"><i></i></span></li>
+                  <li class="ui-pipe__step" data-step="dlq"><span class="ui-pipe__ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-pipe__name"><span class="ui-pipe__nm">Dead letter</span></span><code class="ui-pipe__cmd">38 rows held</code><span class="ui-pipe__time" data-time="3s">Queued</span><span class="ui-pipe__bar"><i></i></span></li>
+                </ol>
+                <div class="ui-pipe__log" aria-hidden="true">
+                  <span class="ui-pipe__line" data-step="extract"><b>$</b>python -m etl.nightly</span>
+                  <span class="ui-pipe__line" data-step="validate">38 rows failed validation</span>
+                  <span class="ui-pipe__line is-on" data-step="upsert">upserted 41,162 of 41,200</span>
+                  <span class="ui-pipe__line" data-step="dlq">38 rows written to dead_letter</span>
+                </div>
+              </div>
+          </div></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section class="section statement" id="approach" data-moment="word-highlight" aria-label="About myself">
+    <div class="wrap">
+      <p class="t-label">About myself</p>
+      <p class="mo-wh__text">I grew up in Abu Dhabi, came back to India for a B.Tech at SRM, and that is where AI caught me. Refinery data at ADNOC. Payroll and access control at Innov8 in Dubai. <strong>Now security tooling for AI agents.</strong></p>
+    </div>
+  </section>
+
+  <section class="section ground-surface" id="questions" aria-labelledby="questions-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5 stack-4">
+          <h2 id="questions-h">Questions</h2>
+          <a class="link" href="https://github.com/aoutix">See the code</a>
+        </div>
+        <div class="faq span-6 start-7">
+          <div class="faq__item"><h3>Is this really how you’d answer?</h3><p>Yes. It speaks from my resume, and I wrote the five answers myself.</p></div>
+          <div class="faq__item"><h3>What about an unprepared question?</h3><p>I answer from my actual work, and say so when I haven’t done something.</p></div>
+          <div class="faq__item"><h3>Can I interrupt an answer?</h3><p>Yes. Talk over it and it stops to listen.</p></div>
+          <div class="faq__item"><h3>What if my microphone is blocked?</h3><p>Type instead. You get the same answer back.</p></div>
+          <div class="faq__item"><h3>Does it work without the live model?</h3><p>It falls back to the browser&rsquo;s own speech, then to the answers held in the page.</p></div>
+          <div class="faq__item"><h3>Which browser do I need?</h3><p>Chrome or Edge for live voice. Others fall back to typing.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="work" aria-labelledby="work-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5 stack-4">
+          <h2 id="work-h">Work in Dubai and Abu Dhabi</h2>
+          <p class="t-lead">At Innov8 I owned payroll, notifications and access control on a multi-tenant HR product, and built the layer that let five model providers sit behind one interface without a tenant spending against another.</p>
+          <p class="t-small">Innov8 Soft Technologies, Dubai, Sep to Oct 2026<br>ADNOC Refining, Abu Dhabi, Dec 2025 to Jan 2026, where Python pipelines removed 20 hours a week of manual work</p>
+          <a class="link" href="https://www.linkedin.com/in/das-aditya">See the history</a>
+        </div>
+        <div class="frame frame--split frame--lit span-6 start-7">
+          <div class="stage stage--fade-b"><div class="at-rise to-edge fit wk">
+            <div class="ui ui-panel ui-apps" data-ui="integrations">
+              <div class="ui-head">
+                <div class="ui-title">Model providers</div>
+                <span class="ui-spacer"></span>
+                <div class="ui-meta">One interface</div>
+              </div>
+              <ul class="ui-apps__list">
+                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/openai.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">OpenAI</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
+                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/anthropic.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Anthropic</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
+                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/google-gemini.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Gemini</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
+                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/mistral.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Mistral</span><span class="ui-app__sub">Prompt templates as records</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
+                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/deepseek.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">DeepSeek</span><span class="ui-app__sub">Prompt templates as records</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
+              </ul>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing footer--statement g2m" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Ask me a question out loud</h2>
+        <p>No sign-in. The mic is at the top of the page.</p>
+      </div>
+      <a class="btn btn--primary btn--xl btn--wide" href="#top" data-mic>Start talking<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>Aditya Das</a>
+          <p class="footer__lede">I’m a backend, full-stack and generative AI engineer, B.Tech 2026.</p>
+        </div>
+        <div class="span-2 footer__col"><h3>Answers</h3><ul><li><a href="#answers">Prepared answers</a></li><li><a href="#questions">Questions</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Projects</h3><ul><li><a href="#projects">MCP-Hardener</a></li><li><a href="#projects">KubeMedic</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Work</h3><ul><li><a href="#work">Innov8, Dubai</a></li><li><a href="#work">ADNOC, Abu Dhabi</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Elsewhere</h3><ul><li><a href="https://github.com/aoutix">GitHub</a></li><li><a href="https://www.linkedin.com/in/das-aditya">LinkedIn</a></li><li><a href="mailto:adityadurjay@gmail.com">Email me</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 Aditya Das</span>
+        <div class="socials"></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/answers.js"></script>
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d17b5a9910b94100a88accc79d25c9a8"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body>
+</html>

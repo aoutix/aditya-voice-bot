@@ -1,0 +1,19 @@
+{
+  "name": "aditya-voice-bot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "node scripts/build-answers.mjs",
+    "test": "node scripts/build-answers.mjs && node scripts/test-build.mjs && node scripts/test-offline.mjs && node scripts/test-turntaking.mjs && node scripts/test-memory.mjs",
+    "test:offline": "node scripts/test-offline.mjs",
+    "test:build": "node scripts/test-build.mjs",
+    "test:live": "node scripts/test-interview.mjs",
+    "test:turns": "node scripts/test-turntaking.mjs",
+    "test:memory": "node scripts/test-memory.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.159.0"
+  }
+}
