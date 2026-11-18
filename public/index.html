@@ -214,6 +214,11 @@
   .vb__ask button { font: inherit; font-size: var(--t-small); font-weight: 500; height: 44px; padding: 0 14px; color: var(--p-action-ink); background: var(--action); border: 0; border-radius: var(--r-sm); cursor: pointer; }
   @media (max-width: 1023px) { .hero__media > .vb { height: auto; } .vb__log { min-height: 128px; } }
 
+  /* the contact line under the closing words */
+  .closing__contact { margin-top: var(--s-3); color: var(--muted); font-size: var(--t-small); }
+  .closing__contact .link { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
+  .closing__contact .link:hover { color: var(--ink); }
+
   /* app-frame (sections-library.md, app-frame): one window, the list beside the open item */
   .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
   .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
@@ -243,7 +248,9 @@
   .app--live > .app__pane > .ui-panel { height: 100%; }
   .app--live .ui-win { display: flex; flex-direction: column; height: 100%; }
   .app--live .ui-win__body { flex: 1 1 auto; min-height: 0; }
-  .app--live .ui-win__side { overflow-y: auto; }
+  .app--live .ui-win__side { overflow-y: auto; overflow-x: clip; }
+  .app--live .ui-win__nav { min-width: 0; }
+  .app--live .ui-win__nav > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app--live .ui-win__main { display: flex; flex-direction: column; min-height: 0; }
   .app--live .ui-win__rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
   .app--live .ui-win__cols { flex: none; }
@@ -260,12 +267,14 @@
   .app--live :is(.ui-win__row, .ui-win__nav, .ans-doc__say, .ui-chat__send):focus-visible {
     outline: 2px solid var(--u-accent); outline-offset: -2px; border-radius: 6px;
   }
+  /* the second line of a row and its state read over the page's lit ground: the stronger grey (4.5:1) */
+  .app .ui-win__sub, .app .ui-win__st { color: var(--u-text-2); }
   .ui-win__empty { margin: 0; padding: 18px 16px; font-size: 13px; line-height: 1.55; color: var(--u-muted); }
 
   /* the search box in the window bar is a real input */
   .ui-win__search { cursor: text; }
   .ui-win__inp { flex: 1; min-width: 0; font: inherit; font-size: 13px; color: var(--u-ink); background: none; border: 0; padding: 0; }
-  .ui-win__inp:focus { outline: none; }
+  .ui-win__inp:focus-visible { outline: 2px solid var(--u-accent); outline-offset: 1px; border-radius: 6px; }
   .ui-win__inp::placeholder { color: var(--u-soft); }
   .ui-win__search:focus-within { box-shadow: inset 0 0 0 1px var(--u-accent); }
   .ui-win__inp::-webkit-search-cancel-button { appearance: none; }
@@ -291,7 +300,7 @@
   .ans__back { display: none; }
   .app--live .ui-chat__input { gap: 6px; padding-right: 4px; }
   .ui-chat__inp { flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--u-ink); background: none; border: 0; }
-  .ui-chat__inp:focus { outline: none; }
+  .ui-chat__inp:focus-visible { outline: 2px solid var(--u-accent); outline-offset: 1px; border-radius: 6px; }
   .ui-chat__inp::placeholder { color: var(--u-soft); }
   .app--live .ui-chat__input:focus-within { box-shadow: inset 0 0 0 1px var(--u-accent); }
   .ui-chat__send { border: 0; cursor: pointer; }
@@ -317,10 +326,6 @@
     .app--live .ans__back { display: grid; place-items: center; width: 28px; height: 28px; margin-left: -4px; color: var(--u-ink); background: none; border: 0; border-radius: 7px; cursor: pointer; }
   }
 
-  /* the fan-in diagram fills its frame so the section is not half empty */
-  #work .frame--split { aspect-ratio: auto; height: 600px; }
-  @media (max-width: 1023px) { #work .frame--split { height: 560px; } }
-  @media (max-width: 639px) { #work .frame--split { height: 236px; } }
 
   /* the three cards stack from 640 to 1023, so the section takes two screens there (layout-v4.md section 2) */
   @media (min-width: 640px) and (max-width: 1279px) { #projects { --h: 2; } }
@@ -346,14 +351,65 @@
   /* the card's link sits on one line under the text, above the panel */
   #projects .card--open > .card__link { margin-bottom: 4px; }
   /* the work split: the provider list rises out of the frame's foot and is cut by its fade */
-  #work .wk { --fit-max: 560px; --ax: 34px; --ay: 168px; --ay-sm: 88px; }
+  #work .wk { --fit-max: 420px; --ax: 40px; --ay: 38px; --ay-sm: 24px; }
+  #work .wk > .ui { width: 100%; }
+  /* the two windows stand the same height, so the frame reads the same whichever role is open
+     (page CSS inside a visual: the chart takes the room the toggles' five rows take) */
+  #work #work-screen-adnoc .ui-stat__svg { height: 196px; }
+
+  /* the history rail: the two roles on one line, each one a tab that opens what I did there and
+     changes the window beside it (page CSS, as timeline-rail's own rail is). Click or arrow keys;
+     nothing times itself. */
+  #work .hist { position: relative; display: grid; }
+  #work .hist::before {
+    content: ""; position: absolute; left: 6px; top: 26px; bottom: 26px; width: 1px;
+    background: var(--line-strong);
+  }
+  #work .hist__btn {
+    position: relative; display: grid; grid-template-columns: 13px minmax(0, 1fr) 16px; gap: 0 var(--s-4);
+    align-items: start; width: 100%; margin: 0; padding: var(--s-3) var(--s-3) var(--s-3) 0; border: 0;
+    border-radius: var(--r-sm); background: none; text-align: left; cursor: pointer; color: var(--muted);
+    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  #work .hist__btn:hover { background: color-mix(in oklab, var(--ink) 5%, transparent); }
+  #work .hist__chev { width: 16px; height: 16px; margin-top: 10px; color: var(--muted); transition: transform var(--dur) var(--ease), color var(--dur) var(--ease); }
+  #work .hist__btn:hover .hist__chev { color: var(--ink); }
+  #work .hist__btn[aria-selected="true"] .hist__chev { transform: rotate(90deg); color: var(--ink); }
+  #work .hist__dot {
+    width: 13px; height: 13px; margin-top: 5px; border-radius: 50%;
+    border: 1px solid var(--line-strong); background: var(--bg);
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  #work .hist__text { display: grid; gap: 2px; min-width: 0; }
+  #work .hist__when { font: 500 var(--t-label)/1.4 var(--font-text); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  #work .hist__role { font-size: 17px; font-weight: 500; line-height: 26px; color: var(--ink); }
+  #work .hist__where { font-size: 15px; line-height: 22px; color: var(--muted); }
+  #work .hist__btn:hover .hist__dot { border-color: var(--ink); }
+  #work .hist__btn[aria-selected="true"] .hist__dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent); }
+  #work .hist__btn[aria-selected="false"] .hist__role { color: var(--muted); }
+  /* what I did there: it opens under the rail on a click, and the two hold the same room so the
+     column never jumps between them */
+  #work .hist__did { min-height: 124px; }
+  #work .hist__did ul { display: grid; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+  #work .hist__did li { font-size: 15px; line-height: 23px; color: var(--ink); }
+  @media (max-width: 639px) { #work .hist__did { min-height: 204px; } }
   #projects .ui-code__pre, #projects .ui-term__track, #projects .ui-pipe__cmd { font-size: 11px; }
   @media (max-width: 1279px) { #projects .ui-code__pre, #projects .ui-term__track, #projects .ui-pipe__cmd { font-size: 10px; } }
 
-  /* the fan-in diagram fills its frame so the section is not half empty */
-  #work .frame--split { aspect-ratio: auto; height: 600px; }
-  @media (max-width: 1023px) { #work .frame--split { height: 420px; } }
-  @media (max-width: 639px) { #work .frame--split { height: 236px; } }
+  /* the work frame holds one window at a time (the history rail picks which), both the same size,
+     each whole with even ground around it: the frame is the window plus its ground, so it is never
+     half empty and never resizes between the two */
+  #work .frame--split { aspect-ratio: auto; height: 420px; }
+  @media (max-width: 1023px) { #work .frame--split { height: 340px; } }
+  /* phone: the section takes its two screens, so the window grows into the room rather than
+     leaving it empty — taller rows, which are easier to read and to hit, and more ground around them */
+  @media (max-width: 639px) {
+    #work .frame--split { height: 690px; }
+    #work .wk { --ay-sm: 104px; }
+    #work #work-screen-innov8 .ui-tg { min-height: 86px; }
+    #work #work-screen-adnoc .ui-stat__svg { height: 364px; }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) { #work .wk { --ay: 24px; } }
 
   /* the moment's per-step visuals are drawn windows, not photographs: they fill the shared frame */
   #projects .mo-pc__visual { display: grid; }
@@ -420,8 +476,8 @@
     <div class="wrap"><div class="hero-text grid hero__grid">
       <div class="hero__text span-5">
         <p class="hero__kicker"><span class="dot" aria-hidden="true"></span>Five questions ready, or ask your own</p>
-        <h1 id="hero-h">I’m Aditya Das. Ask me anything out loud.</h1>
-        <p class="hero__lead">Press the mic and talk, the way you would in an interview. I will answer back: backend systems in Dubai, refinery data in Abu Dhabi, security tooling for AI agents now. No sign-in, no setup, nothing to install.</p>
+        <h1 id="hero-h">Aditya Das, engineer for AI agents</h1>
+        <p class="hero__lead">Ask me anything out loud. Press the mic and talk, as you would in an interview, and I answer back: backend systems in Dubai, refinery data in Abu Dhabi, security tooling for AI agents now. No sign-in, nothing to install.</p>
         <div class="btn-row">
           <a class="btn btn--primary" href="#top" data-mic>Start talking<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
           <a class="btn btn--secondary" href="#answers">Read the answers</a>
@@ -472,7 +528,7 @@
   <section class="section" id="answers" aria-labelledby="answers-h">
     <div class="wrap">
       <div class="grid">
-        <div class="span-5"><h2 id="answers-h">The answers, written out</h2></div>
+        <div class="span-5"><h2 id="answers-h">Forty-five answers, written out</h2></div>
         <div class="span-6 start-7 stack-4">
           <p>Forty-five questions I have answers ready for. Open one to read it, or hand it to the voice and hear it instead — the voice re-words it live, so asking twice never returns the same recording. Anything else, ask in the box at the foot.</p>
           <a class="link" href="#projects">See the projects</a>
@@ -1447,7 +1503,7 @@
   <section class="section" id="projects" style="--hm: 2" aria-labelledby="projects-h">
     <div class="wrap">
       <div class="section-head">
-        <h2 id="projects-h">Projects</h2>
+        <h2 id="projects-h">Three projects I built</h2>
       </div>
       <div class="grid">
         <article class="card card--row card--open span-4">
@@ -1566,32 +1622,109 @@
     </div>
   </section>
 
-  <section class="section" id="work" aria-labelledby="work-h">
+  <section class="section" id="work" style="--hm: 2" aria-labelledby="work-h">
     <div class="wrap">
       <div class="grid">
         <div class="span-5 stack-4">
-          <h2 id="work-h">Work in Dubai and Abu Dhabi</h2>
-          <p class="t-lead">At Innov8 I owned payroll, notifications and access control on a multi-tenant HR product, and built the layer that let five model providers sit behind one interface without a tenant spending against another.</p>
-          <p class="t-small">Innov8 Soft Technologies, Dubai, Sep to Oct 2026<br>ADNOC Refining, Abu Dhabi, Dec 2025 to Jan 2026, where Python pipelines removed 20 hours a week of manual work</p>
-          <a class="link" href="https://www.linkedin.com/in/das-aditya">See the history</a>
+          <h2 id="work-h">Payroll and access control in Dubai</h2>
+          <p class="t-lead">At Innov8 I owned payroll, notifications and role-based access control on a multi-tenant HR product, with every role resolved on the server.</p>
+          <div class="hist" role="tablist" aria-label="Where I have worked">
+            <button class="hist__btn" type="button" role="tab" id="work-tab-innov8" aria-selected="true" aria-controls="work-did-innov8 work-screen-innov8">
+              <span class="hist__dot" aria-hidden="true"></span>
+              <span class="hist__text">
+                <span class="hist__when">Sep to Oct 2026</span>
+                <span class="hist__role">IT Programmer, Innov8 Soft Technologies</span>
+                <span class="hist__where">Dubai</span>
+              </span>
+              <svg class="hist__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </button>
+            <button class="hist__btn" type="button" role="tab" id="work-tab-adnoc" aria-selected="false" tabindex="-1" aria-controls="work-did-adnoc work-screen-adnoc">
+              <span class="hist__dot" aria-hidden="true"></span>
+              <span class="hist__text">
+                <span class="hist__when">Dec 2025 to Jan 2026</span>
+                <span class="hist__role">Digital Intern, Data and Analytics, ADNOC Refining</span>
+                <span class="hist__where">Abu Dhabi</span>
+              </span>
+              <svg class="hist__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </button>
+          </div>
+          <div class="hist__did" role="tabpanel" id="work-did-innov8" aria-labelledby="work-tab-innov8">
+            <ul>
+              <li>Payroll, notifications and access control end to end in NestJS, TypeScript and PostgreSQL, behind 20-plus admin screens</li>
+              <li>A 299-permission layer enforced on 380-plus endpoints, resolved server-side</li>
+              <li>Migration tooling safe to re-run, written for a 14,000-user cutover onto per-tenant data</li>
+            </ul>
+          </div>
+          <div class="hist__did" role="tabpanel" id="work-did-adnoc" aria-labelledby="work-tab-adnoc" hidden>
+            <ul>
+              <li>Python ETL pipelines that loaded legacy refinery logs into the warehouse every night</li>
+              <li>About 20 hours a week of manual reporting gone, and 25% off application latency</li>
+              <li>Forecasts from MLflow-tracked models read in live Plotly dashboards</li>
+            </ul>
+          </div>
+          <div class="btn-row">
+            <a class="btn btn--primary" href="#top" data-mic>Ask about this work<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+            <a class="btn btn--secondary" href="https://www.linkedin.com/in/das-aditya">See the history</a>
+          </div>
         </div>
         <div class="frame frame--split frame--lit span-6 start-7">
-          <div class="stage stage--fade-b"><div class="at-rise to-edge fit wk">
-            <div class="ui ui-panel ui-apps" data-ui="integrations">
-              <div class="ui-head">
-                <div class="ui-title">Model providers</div>
-                <span class="ui-spacer"></span>
-                <div class="ui-meta">One interface</div>
+          <div class="stage">
+            <div class="at-rise fit wk" id="work-screen-innov8" data-ui-loop>
+              <div class="ui ui-panel ui-toggles" data-ui="toggles">
+                <div class="ui-head">
+                  <svg class="ui-icon ui-toggles__ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 13 4v3.6c0 3-2.1 5.4-5 6.6-2.9-1.2-5-3.6-5-6.6V4z"/><path d="m5.8 8 1.6 1.6 3-3.2"/></svg>
+                  <div class="ui-title">What an HR manager may do</div>
+                  <span class="ui-spacer"></span>
+                  <div class="ui-meta" data-tg-count>4 of 5 on</div>
+                </div>
+                <ul class="ui-toggles__list">
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Run the monthly payroll</span><span class="ui-tg__sub">Their own tenant, never another</span></span>
+                    <button class="ui-switch is-on" type="button" role="switch" aria-checked="true" tabindex="-1" aria-label="Run the monthly payroll"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Send a company notification</span><span class="ui-tg__sub">Written to the audit log</span></span>
+                    <button class="ui-switch is-on" type="button" role="switch" aria-checked="true" tabindex="-1" aria-label="Send a company notification"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Edit an employee record</span><span class="ui-tg__sub">Only inside their department</span></span>
+                    <button class="ui-switch is-on" type="button" role="switch" aria-checked="true" tabindex="-1" aria-label="Edit an employee record"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Approve a leave request</span><span class="ui-tg__sub">Their reports, up to 14 days</span></span>
+                    <button class="ui-switch is-on" type="button" role="switch" aria-checked="true" tabindex="-1" aria-label="Approve a leave request"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Export the payroll ledger</span><span class="ui-tg__sub">Finance admin holds this one</span></span>
+                    <button class="ui-switch" type="button" role="switch" aria-checked="false" tabindex="-1" aria-label="Export the payroll ledger"><i></i></button>
+                  </li>
+                </ul>
               </div>
-              <ul class="ui-apps__list">
-                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/openai.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">OpenAI</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
-                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/anthropic.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Anthropic</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
-                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/google-gemini.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Gemini</span><span class="ui-app__sub">Streaming and structured output</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
-                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/mistral.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">Mistral</span><span class="ui-app__sub">Prompt templates as records</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
-                <li class="ui-app is-on"><span class="ui-logo ui-logo--sm"><img src="assets/icons/deepseek.svg" alt="" width="20" height="20" loading="lazy"></span><span class="ui-app__text"><span class="ui-app__name">DeepSeek</span><span class="ui-app__sub">Prompt templates as records</span></span><span class="ui-app__state"><span class="ui-chip ui-app__on">Metered</span></span></li>
-              </ul>
             </div>
-          </div></div>
+            <div class="at-rise fit wk" id="work-screen-adnoc" data-ui-loop hidden>
+              <div class="ui ui-panel ui-stat" data-ui="stat" data-from="20" data-to="2" data-values="19,17,15,12,11,9,7,6,5,4,3,3,2,2" data-prev="20,19,20,18,19,20,18,19,20,19,18,20,19,19">
+                <div class="ui-stat__head">
+                  <div class="ui-stat__top">
+                    <span class="ui-stat__label">Manual hours a week</span>
+                    <span class="ui-stat__range">Dec to Jan<svg class="ui-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg></span>
+                  </div>
+                  <div class="ui-stat__line">
+                    <span class="ui-stat__num" data-stat-num>2</span>
+                    <span class="ui-chip ui-chip--plain ui-stat__delta"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2.5v7M3 6.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>18 fewer</span>
+                    <span class="ui-stat__sub">once the pipelines ran nightly</span>
+                  </div>
+                </div>
+                <div class="ui-stat__chart">
+                  <svg class="ui-stat__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="ui-stat__grid" d="M0 30.5H400M0 60.5H400M0 90.5H400"/>
+                    <path class="ui-stat__cover" fill-rule="evenodd" d=""/>
+                    <g class="ui-stat__bars"><rect rx="3" x="0.00" y="14.44" width="21.14" height="105.56"/><rect rx="3" x="29.14" y="25.56" width="21.14" height="94.44"/><rect rx="3" x="58.29" y="36.67" width="21.14" height="83.33"/><rect rx="3" x="87.43" y="53.33" width="21.14" height="66.67"/><rect rx="3" x="116.57" y="58.89" width="21.14" height="61.11"/><rect rx="3" x="145.71" y="70.00" width="21.14" height="50.00"/><rect rx="3" x="174.86" y="81.11" width="21.14" height="38.89"/><rect rx="3" x="204.00" y="86.67" width="21.14" height="33.33"/><rect rx="3" x="233.14" y="92.22" width="21.14" height="27.78"/><rect rx="3" x="262.29" y="97.78" width="21.14" height="22.22"/><rect rx="3" x="291.43" y="103.33" width="21.14" height="16.67"/><rect rx="3" x="320.57" y="103.33" width="21.14" height="16.67"/><rect rx="3" x="349.71" y="108.89" width="21.14" height="11.11"/><rect rx="3" x="378.86" y="108.89" width="21.14" height="11.11"/></g>
+                  </svg>
+                  <div class="ui-stat__axis" aria-hidden="true"><span>Week 1</span><span>Week 4</span><span>Week 8</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
