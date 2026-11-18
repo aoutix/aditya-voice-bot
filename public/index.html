@@ -332,13 +332,15 @@
   #projects .panel { --p-h: 332px; }
   #projects .pj { --fit-max: 420px; --ax: 28px; --ay: 32px; --ay-sm: 18px; }
   #projects .pj > .ui { width: 100%; }
-  /* phone: three stacked cards must still hold to two screens (layout-v4.md section 2), so the
-     panel is shorter and the two tallest windows give up the rows that carry no point — the
-     terminal keeps its last rows and scrolls the older ones off as a terminal does, the pipeline
-     drops its commit line. Nothing is cut by an edge at any width. */
+  /* phone: three stacked cards must still hold to two screens (layout-v4.md section 2), so the two
+     tallest windows give up the rows that carry no point — the terminal its blank line and the
+     empty prompt waiting under the result (nothing types itself on a phone: ui.js holds every
+     fragment on its finished picture), the pipeline its commit line. Every row that carries the
+     card's point stays, and no window is scrolled, faded or cut at any width. */
   @media (max-width: 639px) {
-    #projects .panel { --p-h: 272px; }
-    #projects .ui-term__screen { height: 192px; }
+    #projects .panel { --p-h: 280px; }
+    #projects .pj { --ay-sm: 16px; }
+    #projects .ui-term__gap, #projects .ui-term__ln[data-term-next] { display: none; }
     #projects .ui-pipe__commit { display: none; }
   }
   /* the card's link sits on one line under the text, above the panel */
