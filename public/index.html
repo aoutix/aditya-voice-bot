@@ -1627,9 +1627,11 @@
       <div class="grid">
         <div class="span-5 stack-4">
           <h2 id="work-h">Payroll and access control in Dubai</h2>
-          <p class="t-lead">At Innov8 I owned payroll, notifications and role-based access control on a multi-tenant HR product, with every role resolved on the server.</p>
+          <p class="t-lead" id="work-lead">At Innov8 I owned payroll, notifications and role-based access control on a multi-tenant HR product, with every role resolved on the server.</p>
           <div class="hist" role="tablist" aria-label="Where I have worked">
-            <button class="hist__btn" type="button" role="tab" id="work-tab-innov8" aria-selected="true" aria-controls="work-did-innov8 work-screen-innov8">
+            <button class="hist__btn" type="button" role="tab" id="work-tab-innov8" aria-selected="true" aria-controls="work-did-innov8 work-screen-innov8"
+              data-head="Payroll and access control in Dubai"
+              data-lead="At Innov8 I owned payroll, notifications and role-based access control on a multi-tenant HR product, with every role resolved on the server.">
               <span class="hist__dot" aria-hidden="true"></span>
               <span class="hist__text">
                 <span class="hist__when">Sep to Oct 2026</span>
@@ -1638,7 +1640,9 @@
               </span>
               <svg class="hist__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
             </button>
-            <button class="hist__btn" type="button" role="tab" id="work-tab-adnoc" aria-selected="false" tabindex="-1" aria-controls="work-did-adnoc work-screen-adnoc">
+            <button class="hist__btn" type="button" role="tab" id="work-tab-adnoc" aria-selected="false" tabindex="-1" aria-controls="work-did-adnoc work-screen-adnoc"
+              data-head="Refinery data in Abu Dhabi"
+              data-lead="At ADNOC Refining I built the Python ETL that carried legacy refinery logs into the warehouse every night, and the dashboards the team read them in.">
               <span class="hist__dot" aria-hidden="true"></span>
               <span class="hist__text">
                 <span class="hist__when">Dec 2025 to Jan 2026</span>
@@ -1762,6 +1766,26 @@
 
 <script type="module" src="assets/system.js"></script>
 <script type="module" src="assets/motion/motion.js"></script>
+<script>
+/* the work section's heading and lead follow the role that is open on its rail: system.js owns the
+   tabs (it shows each one's facts and its window), so this watches aria-selected and writes the two
+   lines the tab carries. Same 280ms fade as the kit's own tab panels; it rests under reduced motion. */
+(() => {
+  const rail = document.querySelector('#work .hist');
+  const head = document.getElementById('work-h'), lead = document.getElementById('work-lead');
+  if (!rail || !head || !lead) return;
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const show = () => {
+    const tab = rail.querySelector('[role="tab"][aria-selected="true"]');
+    if (!tab || !tab.dataset.head) return;
+    if (head.textContent === tab.dataset.head) return;
+    head.textContent = tab.dataset.head;
+    lead.textContent = tab.dataset.lead;
+    if (!reduced()) for (const el of [head, lead]) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
+  };
+  new MutationObserver(show).observe(rail, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });
+})();
+</script>
 <script type="module" src="assets/layout/layout.js"></script>
 <script type="module" src="js/app.js"></script>
 <script type="module" src="js/answers.js"></script>
