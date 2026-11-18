@@ -265,3 +265,8 @@ button:is(.ui-pause, .loop-pause).is-paused svg, button.loop-pause[aria-pressed=
   :where(.ui) *, :where(.ui) *::before, :where(.ui) *::after { transition-duration: 0ms !important; animation: none !important; }
   button.ui-pause.ui-pause, button.loop-pause { display: none; }
 }
+
+/* ==== contact affordances ==== */
+.closing__contact { margin-top: var(--s-3); color: var(--muted); font-size: var(--t-small); }
+.closing__contact .link { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
+.closing__contact .link:hover { color: var(--ink); }

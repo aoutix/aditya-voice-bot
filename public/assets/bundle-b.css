@@ -1,0 +1,743 @@
+
+/* ==== assets/ui/base.css ==== */
+/*
+  taste-skill UI fragment kit - shared base.
+  Small pieces of real product UI, set on an effect ground inside a card's inset panel.
+  The standard (references/cards.md): true product scale (13px text, 12px meta, never under 11px).
+  A fragment is a picture of a product's screen, so the page's 13px floor (VI-05) does not apply
+  inside .ui; every word the page itself says (titles, lines, labels, captions) keeps 13px or more.
+  The rest:
+  real-looking data, crisp 1px borders, radius 10-12, a soft layered shadow, one accent touch
+  (the agent's mark is the ink, so the accent stays free for that one touch).
+
+  Styled only by custom properties set by the page:
+    --ui-font, --ui-mono, --ui-radius
+    --fx-bg (the fragment's own surface), --fx-surface, --fx-ink, --fx-muted, --fx-accent, --fx-accent-ink
+  Light or dark is read from --fx-bg itself (relative colour), so a fragment needs no theme class.
+  Every size sits on a 4px grid. Loops stop under prefers-reduced-motion (the JS shows a still state).
+*/
+:where(.ui) {
+  --u-bg: var(--fx-bg, #ffffff);
+  --u-surface: var(--fx-surface, #f4f4f3);
+  --u-ink: var(--fx-ink, #111111);
+  --u-muted: var(--fx-muted, #6b6b6b);
+  --u-accent: var(--fx-accent, #e8571f);
+  --u-accent-ink: var(--fx-accent-ink, #ffffff);
+  --u-r: var(--ui-radius, 12px);
+  --u-r2: max(4px, calc(var(--u-r) - 4px));
+  --u-r3: max(4px, calc(var(--u-r) - 6px));
+
+  /* lines and fills, all mixed from the palette */
+  --u-line: color-mix(in oklab, var(--u-ink) 9%, transparent);
+  --u-line-2: color-mix(in oklab, var(--u-ink) 15%, transparent);
+  --u-border: color-mix(in oklab, var(--u-ink) 12%, transparent);
+  --u-fill: color-mix(in oklab, var(--u-ink) 3.5%, var(--u-bg));
+  --u-fill-2: color-mix(in oklab, var(--u-ink) 7%, var(--u-bg));
+  --u-fill-3: color-mix(in oklab, var(--u-ink) 11%, var(--u-bg));
+  --u-text-2: color-mix(in oklab, var(--u-ink) 80%, var(--u-bg));
+  --u-soft: color-mix(in oklab, var(--u-muted) 80%, var(--u-bg));
+  --u-tint: color-mix(in oklab, var(--u-accent) 13%, var(--u-bg));
+  --u-tint-2: color-mix(in oklab, var(--u-accent) 24%, var(--u-bg));
+  --u-accent-text: color-mix(in oklab, var(--u-accent) 74%, var(--u-ink));
+  --u-skel: color-mix(in oklab, var(--u-ink) 10%, var(--u-bg));
+  /* a brand tile is light on every surface, so a logo keeps its own colours (references/icons.md) */
+  --u-tile: #ffffff;
+  --u-tile-edge: inset 0 0 0 1px rgb(0 0 0 / 0.09), 0 1px 2px rgb(0 0 0 / 0.12);
+
+  /* depth: shadows grow and a top highlight appears as the fragment surface gets darker */
+  --u-sh: rgb(0 0 0 / 0.14);
+  --u-sh: oklch(from var(--u-bg) 0 0 0 / calc(0.5 - l * 0.38));
+  --u-hi: transparent;
+  --u-hi: oklch(from var(--u-bg) 1 0 0 / clamp(0, calc(0.11 - l * 0.11), 0.09));
+  --u-shadow:
+    inset 0 1px 0 var(--u-hi),
+    0 1px 1px color-mix(in oklab, var(--u-sh) 40%, transparent),
+    0 2px 4px -1px color-mix(in oklab, var(--u-sh) 45%, transparent),
+    0 12px 24px -8px color-mix(in oklab, var(--u-sh) 80%, transparent),
+    0 32px 64px -24px var(--u-sh);
+  --u-shadow-sm:
+    inset 0 1px 0 var(--u-hi),
+    0 1px 2px color-mix(in oklab, var(--u-sh) 55%, transparent),
+    0 6px 16px -6px color-mix(in oklab, var(--u-sh) 80%, transparent);
+  --u-ease: var(--ease, cubic-bezier(.2, .8, .2, 1));   /* the page's one UI ease-out (system.css --ease) */
+  /* the name is older than the rule: a strong ease-out that lands softly and never passes its mark (no overshoot, motion.md) */
+  --u-spring: cubic-bezier(.22, 1, .36, 1);
+
+  font-family: var(--ui-font, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--u-ink);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  text-align: left;
+  letter-spacing: -0.003em;
+  box-sizing: border-box;
+}
+:where(.ui) *, :where(.ui) *::before, :where(.ui) *::after { box-sizing: border-box; }
+/* a fragment never runs out of its panel on its own: on a narrow panel it narrows; a placement that
+   crops it on purpose (cards.css, from 640px: every placement but .at-center) lifts this */
+[data-ui] { max-width: 100%; }
+/* fragments use div and span for text so page rules like `.card p` cannot reach them */
+.ui :where(ul, ol, li, figure, blockquote, article, aside, nav) { margin: 0; padding: 0; list-style: none; }
+.ui :where(mark) { background: none; color: inherit; }
+:where(.ui) button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: default; }
+:where(.ui) svg { display: block; flex: none; }
+
+/* ---------------------------------------------------------------- the window every fragment sits in */
+.ui-panel {
+  position: relative;
+  background: var(--u-bg);
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-r);
+  box-shadow: var(--u-shadow);
+  max-width: 100%;
+}
+.ui-head {
+  display: flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--u-line);
+}
+.ui-title { font-size: 13px; font-weight: 500; line-height: 20px; white-space: nowrap; }
+.ui-meta { font-size: 13px; line-height: 16px; color: var(--u-muted); white-space: nowrap; }
+.ui-spacer { flex: 1; }
+.ui-sep { width: 1px; height: 16px; background: var(--u-line-2); flex: none; }
+
+/* window chrome: three quiet dots and a centred title */
+.ui-dots { display: flex; gap: 6px; flex: none; }
+.ui-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--u-fill-3); box-shadow: inset 0 0 0 0.5px var(--u-line); }
+
+/* ---------------------------------------------------------------- controls */
+/* the primary button is the ink (as on figma.com and x.ai); the accent is kept for one touch */
+.ui-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+  height: 28px; padding: 0 10px; border-radius: max(6px, var(--u-r3));
+  font-size: 13px; font-weight: 500; line-height: 1; white-space: nowrap;
+  background: var(--u-ink); color: var(--u-bg);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--u-bg) 14%, transparent), 0 1px 2px color-mix(in oklab, var(--u-sh) 60%, transparent);
+  transition: transform 160ms var(--u-ease), background-color 200ms var(--u-ease), color 200ms var(--u-ease);
+}
+.ui-btn--accent { background: var(--u-accent); color: var(--u-accent-ink); }
+.ui-btn--ghost { background: var(--u-bg); color: var(--u-ink); box-shadow: inset 0 0 0 1px var(--u-line-2), 0 1px 2px color-mix(in oklab, var(--u-sh) 30%, transparent); }
+.ui-btn--quiet { background: transparent; color: var(--u-muted); box-shadow: none; }
+.ui-btn--sm { height: 24px; padding: 0 8px; font-size: 13px; }
+.ui-btn .ui-icon { width: 14px; height: 14px; }
+.ui-btn.is-pressed { transform: scale(0.96); }
+
+/* status: a dot and a word; quiet by default, the accent only where something is happening */
+.ui-chip {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  height: 22px; padding: 0 8px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; line-height: 1; white-space: nowrap;
+  background: var(--u-fill); color: var(--u-muted); box-shadow: inset 0 0 0 1px var(--u-line);
+}
+.ui-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.55; flex: none; }
+.ui-chip--plain::before { display: none; }
+.ui-chip--accent { background: var(--u-tint); color: var(--u-accent-text); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--u-accent) 22%, transparent); }
+.ui-chip--accent::before { background: var(--u-accent); opacity: 1; }
+.ui-chip--ink { color: var(--u-ink); }
+.ui-chip--ink::before { opacity: 1; }
+.ui-chip--live::before { animation: ui-live 1.6s var(--u-ease) infinite; }
+.ui-chip svg { width: 12px; height: 12px; margin: 0 -1px 0 -2px; }
+.ui-chip:has(svg)::before { display: none; }
+@keyframes ui-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.ui-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--u-accent); flex: none; }
+.ui-kbd {
+  display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 5px;
+  font: 500 13px/1 var(--ui-font, inherit); color: var(--u-muted);
+  background: var(--u-bg); box-shadow: inset 0 0 0 1px var(--u-line-2), inset 0 -1px 0 var(--u-line);
+}
+.ui-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* people: initials on a quiet tone, five tones that never reach violet */
+.ui-avatar {
+  --h: 60;
+  display: grid; place-items: center; flex: none;
+  width: 24px; height: 24px; border-radius: 50%;
+  font-size: 13px; font-weight: 600; line-height: 1; letter-spacing: -0.02em;
+  background: color-mix(in oklab, oklch(0.74 0.08 var(--h)) 34%, var(--u-bg));
+  color: color-mix(in oklab, oklch(0.5 0.09 var(--h)) 70%, var(--u-ink));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, oklch(0.6 0.08 var(--h)) 22%, transparent);
+}
+.ui-avatar[data-tone="1"] { --h: 40; }
+.ui-avatar[data-tone="2"] { --h: 85; }
+.ui-avatar[data-tone="3"] { --h: 150; }
+.ui-avatar[data-tone="4"] { --h: 220; }
+.ui-avatar[data-tone="5"] { --h: 20; }
+.ui-avatar--md { width: 32px; height: 32px; font-size: 13px; }
+.ui-avatar--accent { background: var(--u-accent); color: var(--u-accent-ink); box-shadow: none; }
+
+/* the product's own mark (an assistant, a bot): an ink disc with a four-point spark. It is the ink,
+   not the accent, so a fragment's one accent touch stays free for its status */
+.ui-agent {
+  position: relative; display: block; flex: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--u-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--u-bg) 12%, transparent), inset 0 1px 0 color-mix(in oklab, #fff 16%, transparent);
+}
+.ui-agent::after {
+  content: ""; position: absolute; inset: 26%; background: var(--u-bg);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 .8c.5 4.3 2.9 6.7 7.2 7.2-4.3.5-6.7 2.9-7.2 7.2C7.5 10.9 5.1 8.5.8 8 5.1 7.5 7.5 5.1 8 .8z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 .8c.5 4.3 2.9 6.7 7.2 7.2-4.3.5-6.7 2.9-7.2 7.2C7.5 10.9 5.1 8.5.8 8 5.1 7.5 7.5 5.1 8 .8z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* skeleton lines for the parts of a window that are only context */
+.ui-skel { display: block; height: 6px; border-radius: 3px; background: var(--u-skel); }
+
+/* ---------------------------------------------------------------- brand marks */
+/* Real brand icons are local files (icons/, written by scripts/icons.mjs fetch; icons-credits.json lists them): no page calls
+   a CDN for an icon. A mark on a tile (.ui-logo, .ui-file__icon, .ui-field__tile, .ui-diff__tool, .ui-pipe__tool) is a colour
+   file as <img src="icons/notion.svg" alt="">, the path as printed by fetch for the page that holds it. A small mark inline beside
+   text stays in the ink: the one-colour inline <svg class="ui-brand" aria-hidden="true"> that fetch --mono prints. */
+.ui-brand { display: block; flex: none; width: 18px; height: 18px; }
+svg.ui-brand { fill: currentColor; color: var(--u-ink); }
+.ui-brand--ink { color: var(--u-ink); }
+/* a brand logo on a small tile: the tile is light on every surface and the logo in its own colours */
+.ui-logo {
+  display: grid; place-items: center; flex: none;
+  width: 40px; height: 40px; border-radius: var(--u-r2);
+  background: var(--u-tile); box-shadow: var(--u-tile-edge);
+}
+.ui-logo img, .ui-file__icon img, .ui-field__tile img, .ui-diff__tool img, .ui-pipe__tool img { display: block; flex: none; object-fit: contain; }
+.ui-logo :is(svg, img, .ui-brand) { width: 20px; height: 20px; }
+.ui-logo--sm { width: 32px; height: 32px; border-radius: max(6px, var(--u-r3)); }
+.ui-logo--sm :is(svg, img, .ui-brand) { width: 16px; height: 16px; }
+.ui-logo--lg { width: 56px; height: 56px; border-radius: var(--u-r); }
+.ui-logo--lg :is(svg, img, .ui-brand) { width: 28px; height: 28px; }
+
+/* ---------------------------------------------------------------- the pointer */
+.ui-pointer {
+  position: absolute; left: 0; top: 0; z-index: 5;
+  width: 20px; height: 20px; pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25)) drop-shadow(0 3px 6px rgb(0 0 0 / 0.2));
+  will-change: transform;
+}
+.ui-pointer svg { width: 20px; height: 20px; }
+/* a named pointer (a person or the agent working in the product) */
+.ui-pointer__name {
+  position: absolute; left: 14px; top: 18px; height: 20px; padding: 0 7px; border-radius: 6px 10px 10px 10px;
+  font: 500 13px/20px var(--ui-font, inherit); white-space: nowrap;
+  background: var(--u-accent); color: var(--u-accent-ink);
+}
+.ui-ring {
+  position: absolute; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
+  border: 1.5px solid var(--u-accent); opacity: 0; pointer-events: none; z-index: 4;
+}
+.ui-ring.is-on { animation: ui-ring 520ms var(--u-ease) forwards; }
+@keyframes ui-ring { from { opacity: 0.8; transform: var(--at) scale(0.4); } to { opacity: 0; transform: var(--at) scale(1.5); } }
+
+@keyframes ui-spin { to { transform: rotate(360deg); } }
+.ui-spin {
+  display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none;
+  border: 1.5px solid color-mix(in oklab, currentColor 30%, transparent); border-top-color: currentColor;
+  animation: ui-spin 700ms linear infinite;
+}
+
+/* ---------------------------------------------------------------- held, paused */
+/* a fragment held on its finished picture (data-ui-still, its cycles done) shows nothing that moves:
+   no caret, spinner or pulse runs on in a still picture */
+.is-ui-held, .is-ui-held *, .is-ui-held *::before, .is-ui-held *::after { animation: none !important; }
+.is-ui-paused, .is-ui-paused *, .is-ui-paused *::before, .is-ui-paused *::after { animation-play-state: paused !important; }
+
+/* the pause button ui.loop puts by a looping fragment (and an object from assets/objects, as
+   .loop-pause): a solid disc in the page colours (never a see-through blur), 32px in a 44px hit area,
+   the same as components' .cx-pause and system.css. In a card it sits beside the title (ui.js sets its
+   top and right; the title keeps 44px clear), in a panel outside a card 12px in from the bottom-right
+   corner, and with no panel under the fragment, in 44px kept free below it. */
+button.ui-pause.ui-pause, button.loop-pause {
+  position: absolute; right: 12px; bottom: 12px; z-index: 6; display: grid; place-items: center;
+  width: 32px; height: 32px; margin: 0; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--ink, #111) 16%, transparent);
+  background: var(--bg, #fff); color: var(--ink, #111);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 4px 12px -4px rgb(0 0 0 / 0.28);
+  opacity: 0.88; transition: opacity 200ms ease, border-color 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+button.ui-pause.ui-pause--title { bottom: auto; box-shadow: none; opacity: 1; }
+button.ui-pause.ui-pause--below { right: 0; bottom: 6px; box-shadow: none; }
+.ui-pause-beside { padding-right: 44px; }
+button:is(.ui-pause, .loop-pause)::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+button:is(.ui-pause, .loop-pause):is(:hover, :focus-visible) { opacity: 1; border-color: color-mix(in oklab, var(--ink, #111) 32%, transparent); }
+button:is(.ui-pause, .loop-pause):focus-visible { outline: 2px solid var(--ink, #111); outline-offset: 2px; }
+button:is(.ui-pause, .loop-pause) svg { display: block; width: 14px; height: 14px; fill: currentColor; }
+button:is(.ui-pause, .loop-pause).is-paused svg, button.loop-pause[aria-pressed="true"] svg { margin-left: 1px; }
+@media (forced-colors: active) { button.ui-pause.ui-pause, button.loop-pause { border-color: ButtonText; } }
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.ui) *, :where(.ui) *::before, :where(.ui) *::after { transition-duration: 0ms !important; animation: none !important; }
+  button.ui-pause.ui-pause, button.loop-pause { display: none; }
+}
+
+/* ==== contact affordances ==== */
+.closing__contact { margin-top: var(--s-3); color: var(--muted); font-size: var(--t-small); }
+.closing__contact .link { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
+.closing__contact .link:hover { color: var(--ink); }
+
+/* ==== assets/ui/window/fragment.css ==== */
+/* window: a helpdesk queue (sidebar, list); the assistant works down the open rows */
+.ui-win { width: 600px; overflow: hidden; }
+.ui-win__bar { display: flex; align-items: center; gap: 14px; height: 44px; padding: 0 12px 0 14px; border-bottom: 1px solid var(--u-line); background: var(--u-fill); min-width: 0; }
+/* the breadcrumb gives way first (an ellipsis), so the search box at the right is never pushed out or cut */
+.ui-win__crumb { display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; overflow: hidden; font-size: 13px; line-height: 16px; color: var(--u-muted); white-space: nowrap; }
+.ui-win__crumb b { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ui-win__crumb .ui-brand, .ui-win__crumb i { flex: none; }
+.ui-win__crumb .ui-brand { width: 14px; height: 14px; }
+.ui-win__crumb i { font-style: normal; color: var(--u-muted); }
+.ui-win__crumb b { font-weight: 500; color: var(--u-ink); }
+.ui-win__search { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 28px; width: 168px; padding: 0 4px 0 8px; border-radius: 7px; background: var(--u-bg); box-shadow: inset 0 0 0 1px var(--u-line-2); font-size: 13px; color: var(--u-soft); }
+.ui-win__search .ui-icon { width: 14px; height: 14px; color: var(--u-muted); }
+.ui-win__search .ui-kbd { margin-left: auto; min-width: 20px; height: 20px; font-size: 13px; }
+.ui-win__body { display: grid; grid-template-columns: 152px 1fr; min-height: 312px; }
+.ui-win__side { display: grid; align-content: start; gap: 1px; padding: 8px; border-right: 1px solid var(--u-line); }
+.ui-win__nav {
+  display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px; border-radius: 6px;
+  font-size: 13px; line-height: 16px; color: var(--u-muted);
+}
+.ui-win__nav .ui-icon { width: 14px; height: 14px; }
+.ui-win__nav em { margin-left: auto; font-style: normal; font-size: 13px; color: var(--u-soft); }
+.ui-win__nav.is-on { background: var(--u-fill-2); color: var(--u-ink); font-weight: 500; }
+.ui-win__nav.is-on em { color: var(--u-muted); }
+.ui-win__label { margin: 12px 8px 4px; font-size: 13px; line-height: 16px; color: var(--u-soft); }
+.ui-win__hash { width: 14px; text-align: center; color: var(--u-soft); }
+.ui-win__main { min-width: 0; }
+.ui-win__cols, .ui-win__row { display: grid; grid-template-columns: 24px 92px minmax(0, 1fr) 96px 28px; align-items: center; gap: 0 12px; padding: 0 16px; }
+.ui-win__cols { height: 32px; border-bottom: 1px solid var(--u-line); font-size: 13px; line-height: 16px; color: var(--u-soft); }
+.ui-win__cols span:first-child { grid-column: 1 / 3; }
+.ui-win__row { height: 44px; font-size: 13px; line-height: 16px; transition: background-color 260ms var(--u-ease); }
+.ui-win__row + .ui-win__row { box-shadow: inset 0 1px 0 var(--u-line); }
+.ui-win__row.is-sel { background: color-mix(in oklab, var(--u-ink) 4%, var(--u-bg)); }
+.ui-win__row .ui-avatar { width: 24px; height: 24px; }
+.ui-win__who { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui-win__sub { color: var(--u-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui-win__age { color: var(--u-soft); text-align: right; font-size: 13px; }
+.ui-win__st {
+  display: inline-flex; align-items: center; gap: 6px; justify-self: start; height: 22px; padding: 0 8px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--u-muted); box-shadow: inset 0 0 0 1px var(--u-line-2);
+  transition: color 240ms var(--u-ease), background-color 240ms var(--u-ease), box-shadow 240ms var(--u-ease);
+}
+.ui-win__st::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex: none; }
+/* the row being worked on is the window's one accent touch */
+.ui-win__st.is-work { color: var(--u-accent-text); background: var(--u-tint); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--u-accent) 22%, transparent); }
+.ui-win__st.is-work::before { width: 8px; height: 8px; background: none; border: 1.5px solid color-mix(in oklab, currentColor 30%, transparent); border-top-color: currentColor; opacity: 1; animation: ui-spin 800ms linear infinite; }
+.ui-win__st.is-done { color: var(--u-soft); box-shadow: inset 0 0 0 1px var(--u-line); }
+.ui-win__st.is-you { color: var(--u-ink); box-shadow: inset 0 0 0 1px var(--u-line-2); background: var(--u-fill-2); }
+.ui-win__st.is-you::before { background: var(--u-ink); opacity: 1; }
+/* compact (opts.compact): a narrower window whose rows stack name over subject, for a card panel
+   where the whole width must show; the status stays in view */
+.ui-win--compact { width: 456px; }
+.ui-win--compact .ui-win__body { grid-template-columns: 128px 1fr; }
+.ui-win--compact .ui-win__search { width: 112px; }
+.ui-win--compact .ui-win__cols { display: none; }
+.ui-win--compact .ui-win__row { grid-template-columns: 24px minmax(0, 1fr) auto; grid-template-rows: 18px 16px; align-content: center; height: 56px; row-gap: 1px; padding: 0 14px; }
+.ui-win--compact .ui-win__row .ui-avatar { grid-row: 1 / 3; }
+.ui-win--compact .ui-win__who { grid-column: 2; grid-row: 1; line-height: 18px; }
+.ui-win--compact .ui-win__sub { grid-column: 2; grid-row: 2; font-size: 13px; }
+.ui-win--compact .ui-win__st { grid-column: 3; grid-row: 1 / 3; align-self: center; }
+.ui-win--compact .ui-win__age { display: none; }
+/* narrow: the window's own width decides its layout (a container query), so a .fit wrapper, a small
+   card at 1024 or a phone panel never slices its columns:
+   - under 540px the rows stack name over subject, the column heads and the age go (the compact rows);
+   - under 420px the sidebar goes too and the search shrinks to its icon. */
+.ui-win { container: ui-win / inline-size; }
+@container ui-win (max-width: 539px) {
+  .ui-win .ui-win__cols { display: none; }
+  .ui-win .ui-win__row { grid-template-columns: 24px minmax(0, 1fr) auto; grid-template-rows: 18px 16px; align-content: center; height: 56px; row-gap: 1px; padding: 0 14px; }
+  .ui-win .ui-win__row .ui-avatar { grid-row: 1 / 3; }
+  .ui-win .ui-win__who { grid-column: 2; grid-row: 1; line-height: 18px; }
+  .ui-win .ui-win__sub { grid-column: 2; grid-row: 2; font-size: 13px; }
+  .ui-win .ui-win__st { grid-column: 3; grid-row: 1 / 3; align-self: center; }
+  .ui-win .ui-win__age { display: none; }
+  .ui-win .ui-win__body { grid-template-columns: 128px minmax(0, 1fr); }
+  .ui-win .ui-win__search { width: 112px; }
+}
+@container ui-win (max-width: 419px) {
+  .ui-win .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+  .ui-win .ui-win__side { display: none; }
+  .ui-win .ui-win__search { width: 28px; padding: 0; justify-content: center; gap: 0; }
+  .ui-win .ui-win__search :is(.ui-kbd, .ui-win__ph) { display: none; }
+  .ui-win .ui-win__row { gap: 0 10px; padding: 0 12px; }
+  .ui-win .ui-win__bar { gap: 10px; padding: 0 8px 0 12px; }
+}
+/* very narrow: the window dots go too, the crumb keeps its last word */
+@container ui-win (max-width: 299px) {
+  .ui-win .ui-dots { display: none; }
+}
+/* phone: the window takes the panel's width (cards.css); the queries above lay it out */
+@media (max-width: 639px) {
+  .ui-win, .ui-win--compact { width: 100%; }
+}
+
+/* ==== assets/ui/chat/fragment.css ==== */
+/* chat: a customer asks, the assistant answers word by word with the sources it used */
+/* in a .to-edge wrapper the body grows to fill it, so the input always sits past the panel's edge */
+.ui-chat { width: 400px; overflow: hidden; display: flex; flex-direction: column; }
+.ui-chat > .ui-head, .ui-chat__input { flex: none; }
+.ui-chat .ui-head .ui-agent { width: 20px; height: 20px; }
+.ui-chat__online { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--u-muted); }
+/* a quiet ink dot, as every status in the kit: no off-palette green */
+.ui-chat__online::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+.ui-chat__tool { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; color: var(--u-muted); }
+/* --chat-body sets the empty room above the input, so a placement can push the input past the panel's
+   edge by a clear margin (cut on purpose) or keep it in view */
+.ui-chat__body { flex: 1 0 auto; display: grid; gap: 12px; padding: 12px 16px 16px; min-height: var(--chat-body, 216px); align-content: start; }
+.ui-chat__day { justify-self: center; font-size: 13px; line-height: 16px; color: var(--u-muted); }
+.ui-msg { font-size: 13px; line-height: 20px; transition: opacity 260ms var(--u-ease), transform 360ms var(--u-ease); }
+.ui-msg--me {
+  justify-self: end; max-width: 280px; padding: 8px 12px; border-radius: 14px 14px 4px 14px;
+  background: var(--u-fill-2); color: var(--u-ink); box-shadow: inset 0 0 0 1px var(--u-line);
+}
+.ui-msg--bot { display: flex; gap: 10px; align-items: flex-start; max-width: 340px; }
+.ui-msg__av { width: 22px; height: 22px; margin-top: 1px; }
+.ui-msg__col { display: grid; gap: 10px; min-width: 0; color: var(--u-text-2); }
+.ui-msg--bot b { font-weight: 500; color: var(--u-ink); }
+.ui-msg.is-hidden { opacity: 0; transform: translateY(6px); }
+.ui-chat__srcs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ui-chat__src {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px 0 6px;
+  border-radius: 6px; font-size: 13px; font-weight: 500; line-height: 16px; color: var(--u-muted);
+  background: var(--u-bg); box-shadow: inset 0 0 0 1px var(--u-line-2);
+}
+.ui-chat__src :is(.ui-icon, .ui-brand) { width: 13px; height: 13px; }
+/* the answer's last sentence is written again in place: its words never drop below 72% ink */
+.ui-chat__w { transition: opacity 180ms var(--u-ease); }
+.ui-chat__w.is-off { opacity: 0.72; }
+.ui-chat__srcs.is-hidden { opacity: 0; }
+.ui-chat__src { transition: opacity 240ms var(--u-ease, ease), transform 240ms var(--u-ease, ease); }
+.ui-chat__src.is-wait { opacity: 0; transform: translateY(3px); }
+/* the typing dots: under the answer where its sources sit, only while the next words are on their way */
+.ui-msg__col { position: relative; }
+.ui-chat__typing { position: absolute; left: 0; bottom: 4px; display: flex; gap: 4px; opacity: 0; transition: opacity 160ms ease; pointer-events: none; }
+.ui-chat__typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--u-muted, #6b6b6b); animation: ui-chat-dot 900ms ease-in-out infinite; }
+.ui-chat__typing i:nth-child(2) { animation-delay: 150ms; } .ui-chat__typing i:nth-child(3) { animation-delay: 300ms; }
+.ui-chat.is-typing .ui-chat__typing { opacity: 1; }
+@keyframes ui-chat-dot { 0%, 60%, 100% { transform: none; opacity: .45; } 30% { transform: translateY(-3px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ui-chat__typing { display: none; } }
+.ui-chat__srcs { transition: opacity 320ms var(--u-ease); }
+.ui-chat__input {
+  display: flex; align-items: center; gap: 8px; height: 40px; margin: 0 12px 12px; padding: 0 4px 0 12px;
+  border-radius: 10px; background: var(--u-fill); box-shadow: inset 0 0 0 1px var(--u-line-2);
+  font-size: 13px; color: var(--u-soft);
+}
+.ui-chat__ph { flex: 1; }
+.ui-chat__send { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: var(--u-ink); color: var(--u-bg); }
+
+/* ==== assets/ui/code/fragment.css ==== */
+/* code: an editor pane with one highlighted line and a short note about it. The tokens are ink tints
+   (keywords the ink, names a step lighter, numbers and comments muted); the accent is used once,
+   on the marked line (its bar and a faint wash) */
+.ui-code { width: 440px; overflow: hidden; }
+.ui-code__tabs { display: flex; align-items: center; gap: 2px; height: 40px; padding: 0 12px 0 8px; border-bottom: 1px solid var(--u-line); background: var(--u-fill); }
+.ui-code__tab { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: var(--u-r3); font-size: 13px; line-height: 16px; color: var(--u-muted); }
+.ui-code__tab.is-on { background: var(--u-bg); color: var(--u-ink); box-shadow: 0 0 0 1px var(--u-line), 0 1px 2px rgb(0 0 0 / 0.06); }
+.ui-code__lang { font: 600 13px/1 var(--ui-mono, ui-monospace, monospace); font-style: normal; padding: 2px 4px; border-radius: 3px; background: var(--u-fill-2); color: var(--u-muted); box-shadow: inset 0 0 0 1px var(--u-line); }
+.ui-code__pre { margin: 0; padding: 12px 0; font: 13px/20px var(--ui-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace); color: var(--u-ink); white-space: pre; overflow: hidden; }
+.ui-code__pre code { display: block; font: inherit; white-space: normal; }
+.ui-code__ln { position: relative; display: block; padding: 0 16px 0 48px; white-space: pre; transition: background-color 300ms var(--u-ease); }
+.ui-code__ln::before { content: attr(data-n); position: absolute; left: 0; width: 32px; text-align: right; color: var(--u-soft); }
+.ui-code__ln::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--u-accent); opacity: 0; transition: opacity 300ms var(--u-ease); }
+.ui-code__ln.is-mark { background: color-mix(in oklab, var(--u-accent) 9%, transparent); }
+.ui-code__ln.is-mark::after { opacity: 1; }
+.ui-code__ln.is-mark::before { color: var(--u-ink); }
+.ui-code .k { color: var(--u-ink); font-weight: 500; }
+.ui-code .f { color: color-mix(in oklab, var(--u-ink) 88%, var(--u-bg)); }
+.ui-code__pre { color: color-mix(in oklab, var(--u-ink) 68%, var(--u-bg)); }
+.ui-code .n { color: var(--u-muted); }
+.ui-code .c { color: var(--u-muted); font-style: italic; }
+.ui-code__hint {
+  display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-top: 1px solid var(--u-line);
+  font-size: 13px; line-height: 16px; color: var(--u-muted); transition: opacity 240ms var(--u-ease);
+}
+.ui-code__hint .ui-dot { width: 6px; height: 6px; background: var(--u-ink); }
+.ui-code__hint.is-hidden { opacity: 0; }
+@media (max-width: 440px) { .ui-code { width: 100%; } .ui-code__pre { font-size: 13px; } }
+
+/* ==== assets/ui/terminal-run/fragment.css ==== */
+/* terminal-run: a terminal pane. A command is typed at the prompt and run; a meter, one line per test
+   file (a spinner while it runs, then its tick), a summary and a status line stream in below while the
+   older run scrolls up. Monospace at the code fragment's size (13/20) in ink tints: the command and the
+   status word the ink, output 80% ink, paths and timings muted. The accent is used once, on the
+   meter's thin bar. The status line's check is the one green and the strongest mark: an oklch hue
+   mixed with the ink (as .ui-avatar mixes its tones), so it follows any palette, light or dark; the
+   per-file ticks stay ink (never a row of green checks). */
+.ui-term {
+  --t-ok: color-mix(in oklab, oklch(0.63 0.15 150) 84%, var(--u-ink));
+  width: 440px; overflow: hidden;
+  container: ui-term / inline-size;
+}
+.ui-term__head { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px 0 14px; border-bottom: 1px solid var(--u-line); background: var(--u-fill); min-width: 0; }
+.ui-term__title { min-width: 0; margin-left: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; line-height: 16px; }
+.ui-term__branch { font-family: var(--ui-mono, ui-monospace, monospace); font-weight: 400; }
+
+/* the screen: its height is the finished picture's; while a run streams in it is held at that height
+   and the track scrolls up under it, a whole 20px row at a time (every line, the blank one too, is one
+   row, so the track never leaves the row grid). A line leaving the top fades out whole (is-gone) as
+   it scrolls; the 12px mask only softens its passage through the track's own top padding, so no line
+   ever rests half-cut under the header's rule */
+.ui-term__screen {
+  position: relative; overflow: hidden;
+  -webkit-mask: linear-gradient(to bottom, transparent, #000 12px); mask: linear-gradient(to bottom, transparent, #000 12px);
+}
+.ui-term__track {
+  position: relative; padding: 12px 0;
+  font: 13px/20px var(--ui-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
+  color: var(--u-text-2); letter-spacing: 0; font-feature-settings: normal;
+  transition: transform 120ms var(--u-ease);
+}
+/* every line is one row: it ellipsizes on a narrow pane, never wraps */
+.ui-term__ln { display: flex; align-items: center; gap: 10px; height: 20px; padding: 0 16px; min-width: 0; white-space: pre; transition: opacity 120ms var(--u-ease); }
+.ui-term__ln > * { flex: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ui-term__ln.is-gone { opacity: 0; }
+
+/* the prompt: the repo's parent folder goes first on a narrow pane, so the prompt still names it */
+.ui-term__cmd { gap: 0; }
+.ui-term__cwd { margin-right: 8px; color: var(--u-muted); }
+.ui-term__sig { margin-right: 8px; color: var(--u-muted); }
+.ui-term__typed { flex: 0 1 auto; color: var(--u-ink); font-weight: 500; }
+.ui-term__caret { display: block; width: 7px; height: 15px; margin-left: 1px; border-radius: 1px; background: var(--u-ink); animation: ui-term-caret 1s steps(1) infinite; }
+/* typing, paused or off screen: a solid caret (a paused blink could stop in its hidden half) */
+.ui-term.is-typing .ui-term__caret, .is-ui-paused .ui-term__caret { animation: none; }
+.ui-term__cmd.is-ran .ui-term__caret { display: none; }
+@keyframes ui-term-caret { 50% { opacity: 0; } }
+
+/* the meter: its thin bar is the accent touch, quieter than the status check; the count's first
+   figure follows the files */
+.ui-term__bar { display: block; width: 96px; height: 3px; border-radius: 2px; background: var(--u-fill-3); overflow: hidden; }
+.ui-term__bar i { display: block; height: 100%; background: var(--u-accent); transform-origin: left center; transform: scaleX(var(--p, 1)); transition: transform 180ms var(--u-ease); }
+.ui-term__count { color: var(--u-text-2); }
+
+/* a file's line: tick (the kit's .ui-spin while the file runs), path, count, time */
+.ui-term__tick { width: 14px; height: 14px; fill: none; stroke: var(--u-muted); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.ui-term__wait { display: grid; place-items: center; width: 14px; height: 14px; color: var(--u-text-2); }
+.ui-term__wait .ui-spin { width: 12px; height: 12px; border-width: 1.75px; animation-duration: 1s; }
+/* the path takes up to 28 characters, so on a card-size pane the count and time stay beside it */
+.ui-term__path { flex: 0 1 28ch; color: var(--u-text-2); }
+.ui-term__n { color: var(--u-muted); }
+.ui-term__t { width: 48px; text-align: right; color: var(--u-muted); }
+
+/* the summary, a blank row above it (one row, so the track stays on the 20px grid) */
+.ui-term__key { width: 88px; color: var(--u-muted); }
+.ui-term__val { color: var(--u-ink); }
+.ui-term__dim { flex: 0 1 auto; color: var(--u-muted); }
+
+/* the status: a green check, the word in ink, the duration */
+.ui-term__done { gap: 8px; }
+.ui-term__done b { font-weight: 500; color: var(--u-ink); }
+.ui-term__ok { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--t-ok); color: var(--u-bg); overflow: visible; }
+.ui-term__ok svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* a line arriving in a run (the script marks it is-new): a short rise; a file's tick and the status
+   check settle in. Nothing here runs in the finished picture, held, or under reduced motion (base.css) */
+.ui-term__ln.is-new { animation: ui-term-in 140ms var(--u-ease) 110ms backwards; }
+.ui-term__ln.is-new .ui-term__ok { animation: ui-term-pop 240ms var(--u-ease) 110ms both; }
+.ui-term__tick.is-new { animation: ui-term-pop 200ms var(--u-ease) both; }
+@keyframes ui-term-in { from { opacity: 0; transform: translateY(4px); } }
+@keyframes ui-term-pop { from { opacity: 0; transform: scale(0.6); } }
+
+/* narrow: the pane's own width decides (a container query), so a .fit wrapper or a phone panel never
+   slices a column: the test counts go first, then the branch and the repo's parent folder
+   (the prompt reads ~/api) */
+@container ui-term (max-width: 379px) {
+  .ui-term .ui-term__n { display: none; }
+  .ui-term .ui-term__bar { width: 80px; }
+}
+@container ui-term (max-width: 299px) {
+  .ui-term .ui-term__branch, .ui-term .ui-term__up { display: none; }
+  .ui-term .ui-term__t { width: 44px; }
+  .ui-term .ui-term__path { flex: 1 1 0; }
+  .ui-term .ui-term__ln { padding: 0 12px; }
+  .ui-term .ui-term__key { width: 80px; }
+}
+/* phone: the pane takes the panel's width (cards.css); the queries above lay it out */
+@media (max-width: 639px) { .ui-term { width: 100%; } }
+
+/* ==== assets/ui/pipeline-board/fragment.css ==== */
+/* pipeline-board: a CI run (repo, branch, commit) and its steps on one rail: done steps take an
+   ink-outlined check and their time, the running step its spinner and bar, waiting steps stay muted.
+   The running step is the fragment's one accent touch (its ring, its bar, its node's edge) and its
+   strongest mark; the status chip, the checks and the times are the ink. From 680px of its own width
+   (a container query) the steps become a row of connected nodes with the running step's log under them. */
+.ui-pipe { width: 420px; overflow: hidden; container: ui-pipe / inline-size; }
+.ui-pipe code { font: inherit; }
+
+/* head: branch, run, total time, status */
+.ui-pipe__head { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 14px; border-bottom: 1px solid var(--u-line); min-width: 0; }
+.ui-pipe__branch { flex: none; width: 14px; height: 14px; color: var(--u-muted); }
+.ui-pipe__repo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: var(--u-muted); }
+.ui-pipe__slash { flex: none; font-style: normal; font-size: 12px; line-height: 16px; color: var(--u-soft); margin: 0 -2px; }
+.ui-pipe__ref { flex: none; padding: 2px 6px; border-radius: 5px; font: 500 12px/16px var(--ui-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace); color: var(--u-ink); background: var(--u-fill-2); box-shadow: inset 0 0 0 1px var(--u-line); }
+.ui-pipe__run { flex: none; font: 12px/16px var(--ui-mono, ui-monospace, monospace); color: var(--u-soft); }
+.ui-pipe__total { display: inline-flex; align-items: center; gap: 6px; flex: none; font: 500 12px/16px var(--ui-mono, ui-monospace, monospace); color: var(--u-ink); font-variant-numeric: tabular-nums; }
+.ui-pipe__total .ui-icon { width: 14px; height: 14px; color: var(--u-muted); }
+.ui-pipe__chip::before { opacity: 1; }
+/* passed: the chip's dot becomes an ink check on a firmer fill and the total stands frozen in bold ink,
+   so the end of the run reads at a glance without a colour of its own */
+.ui-pipe.is-passed .ui-pipe__chip { background: var(--u-fill-2); color: var(--u-ink); box-shadow: inset 0 0 0 1px var(--u-line-2); }
+.ui-pipe.is-passed .ui-pipe__chip::before {
+  width: 10px; height: 10px; border-radius: 0; background: currentColor; opacity: 1; animation: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.4 3.2 3.2L13 4.6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8.4 3.2 3.2L13 4.6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ui-pipe.is-passed .ui-pipe__total { font-weight: 700; }
+.ui-pipe.is-passed .ui-pipe__total .ui-icon { color: var(--u-ink); }
+
+/* the commit the run is for */
+.ui-pipe__commit { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px 0 14px; border-bottom: 1px solid var(--u-line); background: var(--u-fill); min-width: 0; }
+.ui-pipe__msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 20px; color: var(--u-text-2); }
+.ui-pipe__sha { flex: none; font: 12px/16px var(--ui-mono, ui-monospace, monospace); color: var(--u-muted); }
+/* the button steps toward the ink under a fine pointer and presses (the loop presses it to re-run) */
+.ui-pipe__btn { transition: transform 90ms var(--u-ease), background-color 200ms var(--u-ease), box-shadow 200ms var(--u-ease); }
+@media (hover: hover) and (pointer: fine) {
+  .ui-pipe__btn:hover { background: var(--u-fill-2); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--u-ink) 24%, transparent); transition-duration: 90ms, 140ms, 140ms; }
+}
+.ui-pipe__btn:active, .ui-pipe__btn.is-pressed { transform: scale(0.96); background: var(--u-fill-3); }
+
+/* steps: rows on a rail */
+.ui-pipe__steps { padding: 4px 0; }
+.ui-pipe__step {
+  position: relative; display: grid; grid-template-columns: 18px auto minmax(0, 1fr) auto; align-items: center; column-gap: 12px;
+  height: 40px; padding: 0 16px 0 14px; transition: background-color 240ms var(--u-ease);
+}
+.ui-pipe__step.is-run { background: color-mix(in oklab, var(--u-ink) 3.5%, transparent); }
+/* the marker's box is 18px (the running ring fills it); waiting and done draw a 16px ring inside it */
+.ui-pipe__ico {
+  position: relative; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--u-ink);
+  transition: box-shadow 240ms var(--u-ease);
+}
+.ui-pipe__ico::after {
+  content: ""; position: absolute; inset: 1px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--u-ink) 30%, transparent); transition: box-shadow 240ms var(--u-ease);
+}
+.ui-pipe__ico svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ui-pipe__ico path { stroke-dasharray: 12; stroke-dashoffset: 12; transition: stroke-dashoffset 280ms var(--u-ease) 60ms; }
+/* the rail: a short line up to the step before; it darkens once that step is done */
+.ui-pipe__step + .ui-pipe__step .ui-pipe__ico::before {
+  content: ""; position: absolute; left: 50%; bottom: calc(100% + 3px); width: 1.5px; height: 16px; margin-left: -0.75px;
+  background: var(--u-line-2); transition: background-color 240ms var(--u-ease);
+}
+.ui-pipe__step:is(.is-done, .is-run) .ui-pipe__ico::before { background: color-mix(in oklab, var(--u-ink) 38%, transparent); }
+/* done: an ink-outlined ring and an ink check, quieter than the running ring */
+.ui-pipe__step.is-done .ui-pipe__ico::after { box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--u-ink) 70%, transparent); }
+.ui-pipe__step.is-done .ui-pipe__ico path { stroke-dashoffset: 0; }
+/* running: an accent ring that turns round an accent dot (the life sign: 1 s a turn) */
+.ui-pipe__step.is-run .ui-pipe__ico {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--u-accent) 24%, transparent);
+  background: radial-gradient(circle, var(--u-accent) 0 3px, transparent 3.5px);
+}
+.ui-pipe__step.is-run .ui-pipe__ico::after {
+  inset: 0; box-shadow: inset 0 0 0 1.5px transparent;
+  border: 1.5px solid transparent; border-top-color: var(--u-accent); border-right-color: var(--u-accent);
+  animation: ui-spin 1s linear infinite;
+}
+.ui-pipe__name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; line-height: 20px; font-weight: 500; white-space: nowrap; color: var(--u-muted); transition: color 240ms var(--u-ease); }
+.ui-pipe__nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* the tool each step runs, its real mark in its own colours on the light tile every surface gets; a
+   waiting step's tile is dimmed, a done or running step's is at full strength */
+.ui-pipe__tool {
+  display: grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 6px;
+  background: var(--u-tile); box-shadow: var(--u-tile-edge); opacity: 0.55; transition: opacity 240ms var(--u-ease);
+}
+.ui-pipe__tool :is(.ui-brand, img) { width: 13px; height: 13px; }
+.ui-pipe__step:is(.is-done, .is-run) .ui-pipe__tool { opacity: 1; }
+.ui-pipe__cmd { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/16px var(--ui-mono, ui-monospace, monospace); color: var(--u-soft); transition: color 240ms var(--u-ease); }
+.ui-pipe__time { min-width: 48px; text-align: right; white-space: nowrap; font: 12px/16px var(--ui-mono, ui-monospace, monospace); color: var(--u-muted); font-variant-numeric: tabular-nums; }
+.ui-pipe__step:is(.is-done, .is-run) .ui-pipe__name { color: var(--u-ink); }
+.ui-pipe__step:is(.is-done, .is-run) .ui-pipe__cmd { color: var(--u-muted); }
+.ui-pipe__step.is-run .ui-pipe__time { color: var(--u-ink); }
+/* the running step's bar (--k, 0 to 1): only the running step shows it */
+.ui-pipe__bar {
+  position: absolute; left: 44px; right: 16px; bottom: 3px; height: 2px; border-radius: 1px; overflow: hidden;
+  background: var(--u-line-2); opacity: 0; transition: opacity 200ms var(--u-ease);
+}
+.ui-pipe__bar i { position: absolute; inset: 0; background: var(--u-accent); transform-origin: left; transform: scaleX(var(--k, 0)); }
+.ui-pipe__step.is-run .ui-pipe__bar { opacity: 1; }
+/* the run starting over: every step back at once */
+.ui-pipe.is-reset * { transition-duration: 160ms !important; transition-delay: 0ms !important; }
+
+/* the running step's log: only in the wide layout */
+.ui-pipe__log { display: none; }
+.ui-pipe__line { display: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-pipe__line.is-on { display: block; animation: ui-pipe-in 240ms var(--u-ease) both; }
+.ui-pipe__line b { margin-right: 8px; font-weight: 500; color: var(--u-ink); }
+.ui-pipe__line:has(b) { color: var(--u-text-2); }
+@keyframes ui-pipe-in { from { opacity: 0; transform: translateY(2px); } }
+
+/* narrow: the run number, the commit id and the clock give way first, then the repo (the branch glyph,
+   the branch, the total and the status always stay), then the commands */
+@container ui-pipe (max-width: 399px) {
+  .ui-pipe .ui-pipe__run, .ui-pipe .ui-pipe__sha, .ui-pipe .ui-pipe__total .ui-icon { display: none; }
+  .ui-pipe .ui-pipe__head { gap: 6px; }
+  .ui-pipe .ui-pipe__step { column-gap: 10px; padding: 0 12px; }
+  .ui-pipe .ui-pipe__bar { left: 40px; right: 12px; }
+}
+@container ui-pipe (max-width: 299px) {
+  .ui-pipe :is(.ui-pipe__repo, .ui-pipe__slash) { display: none; }
+  .ui-pipe .ui-pipe__time { min-width: 40px; }
+}
+@container ui-pipe (max-width: 279px) {
+  .ui-pipe .ui-pipe__step { grid-template-columns: 18px minmax(0, 1fr) auto; }
+  .ui-pipe .ui-pipe__cmd { display: none; }
+}
+
+/* wide (a .fit in a large panel or a split card): the steps as a row of connected nodes, each with
+   its name and time, the running node with its bar; the commands move to the running step's log */
+@container ui-pipe (min-width: 680px) {
+  .ui-pipe .ui-pipe__steps { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 24px; padding: 16px; }
+  /* each node is a real 1px border; only its colour and the fill change, the running node's shadow
+     comes and goes without a transition */
+  .ui-pipe .ui-pipe__step {
+    grid-template-columns: 18px minmax(0, 1fr); grid-template-rows: 20px 16px 4px; row-gap: 8px; column-gap: 10px;
+    height: auto; padding: 11px; border: 1px solid var(--u-line-2); border-radius: var(--u-r2);
+    background: var(--u-bg); box-shadow: none;
+    transition: background-color 240ms var(--u-ease);
+  }
+  .ui-pipe .ui-pipe__step.is-run { background: var(--u-bg); border-color: color-mix(in oklab, var(--u-accent) 46%, transparent); box-shadow: var(--u-shadow-sm); }
+  .ui-pipe .ui-pipe__step:not(.is-done, .is-run) { background: var(--u-fill); border-color: var(--u-line); }
+  .ui-pipe .ui-pipe__ico { grid-area: 1 / 1; }
+  .ui-pipe .ui-pipe__name { grid-area: 1 / 2; min-width: 0; overflow: hidden; }
+  .ui-pipe .ui-pipe__time { grid-area: 2 / 2; min-width: 0; text-align: left; }
+  .ui-pipe .ui-pipe__cmd { display: none; }
+  .ui-pipe .ui-pipe__bar { position: relative; left: auto; right: auto; bottom: auto; grid-area: 3 / 1 / 4 / 3; height: 4px; border-radius: 2px; }
+  /* the rail turns sideways: a line across the gap to the next node, from border to border */
+  .ui-pipe .ui-pipe__step + .ui-pipe__step .ui-pipe__ico::before { content: none; }
+  .ui-pipe .ui-pipe__step:not(:last-child)::after {
+    content: ""; position: absolute; left: calc(100% + 1px); top: 20px; width: 24px; height: 1.5px; margin-top: -0.75px;
+    background: var(--u-line-2); transition: background-color 240ms var(--u-ease);
+  }
+  .ui-pipe .ui-pipe__step.is-done:not(:last-child)::after { background: color-mix(in oklab, var(--u-ink) 38%, transparent); }
+  .ui-pipe .ui-pipe__log {
+    display: block; min-height: 82px; margin: 0 16px 16px; padding: 11px 14px;
+    border-radius: var(--u-r2); background: var(--u-fill); box-shadow: inset 0 0 0 1px var(--u-line);
+    font: 12px/20px var(--ui-mono, ui-monospace, monospace); color: var(--u-text-2);
+  }
+}
+
+/* phone: the board takes the panel's width (cards.css); the queries above lay it out */
+@media (max-width: 639px) { .ui-pipe { width: 100%; } }
+
+/* ==== assets/ui/integrations/fragment.css ==== */
+/* integrations: connected apps with their real icons (local colour files in icons/); one connects in the loop */
+.ui-apps { width: 380px; overflow: hidden; }
+.ui-apps__list { padding: 4px 0; }
+.ui-app { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 14px 0 16px; }
+.ui-app + .ui-app { box-shadow: inset 0 1px 0 var(--u-line); }
+.ui-app__text { display: grid; flex: 1; min-width: 0; }
+.ui-app__name { font-size: 13px; font-weight: 500; line-height: 20px; }
+.ui-app__sub { font-size: 13px; line-height: 16px; color: var(--u-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui-app__state { display: grid; justify-items: end; flex: none; }
+.ui-app__state > * { grid-area: 1 / 1; transition: opacity 200ms var(--u-ease), transform 260ms var(--u-ease); }
+.ui-app .ui-app__on { opacity: 0; transform: scale(0.94); }
+/* Connected is quiet ink on every row (a row of green dots reads as tinted chips everywhere) */
+.ui-app .ui-app__on { color: var(--u-ink); }
+.ui-app .ui-app__on::before { opacity: 0.7; }
+.ui-app.is-on .ui-app__on { opacity: 1; transform: none; }
+.ui-app.is-on .ui-app__connect { opacity: 0; pointer-events: none; }
+.ui-app__spin { display: none; width: 10px; height: 10px; }
+.ui-app.is-busy .ui-app__spin { display: inline-block; }
+.ui-apps .ui-pointer { transition: transform 720ms cubic-bezier(0.45, 0, 0.2, 1), opacity 300ms ease; }
+/* --apps-w widens the list for a wide panel (a split card) */
+.ui-apps { width: var(--apps-w, 380px); }
+/* phone: the list takes the panel's width (cards.css); a long line wraps instead of being cut */
+@media (max-width: 639px) {
+  .ui-app { height: auto; min-height: 56px; padding: 10px 12px 10px 14px; }
+  .ui-app__sub { white-space: normal; }
+}

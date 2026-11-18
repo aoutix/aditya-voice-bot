@@ -15,15 +15,16 @@
 <!-- <link rel="canonical" href="https://[the domain, once it is known]/"> -->
 <meta name="site-kind" content="software">
 <meta name="page-type" content="software">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/system.css">
-<link rel="stylesheet" href="assets/ui/cards.css">
-<link rel="stylesheet" href="assets/motion/motion.css">
-<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
-<link rel="stylesheet" href="assets/layout/layout.css">
-<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Self-hosted so first paint never waits on a third-party origin. */
+@font-face{font-family:'Manrope';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/manrope-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Manrope';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/manrope-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 500;font-display:swap;src:url(assets/fonts/jetbrainsmono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 500;font-display:swap;src:url(assets/fonts/jetbrainsmono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+</style>
+<link rel="stylesheet" href="assets/bundle-a.css">
 <style>
 :root {
   --p-bg: #eef0f3; --p-surface: #e2e5ea; --p-ink: #0b0c0e; --p-muted: #5d6470;
@@ -39,15 +40,133 @@
   --ly-scale: 0.97;
 }
 </style>
-<link rel="stylesheet" href="assets/ui/base.css">
-<link rel="stylesheet" href="assets/ui/window/fragment.css">
-<link rel="stylesheet" href="assets/ui/chat/fragment.css">
-<link rel="stylesheet" href="assets/ui/code/fragment.css">
-<link rel="stylesheet" href="assets/ui/terminal-run/fragment.css">
-<link rel="stylesheet" href="assets/ui/pipeline-board/fragment.css">
-<link rel="stylesheet" href="assets/ui/integrations/fragment.css">
+<link rel="stylesheet" href="assets/bundle-b.css">
 <script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
-<script src="assets/backgrounds/backgrounds.js"></script>
+<script>
+/*
+  taste-skill backgrounds.js - optional, about 2 KB of work. Load it plain (not deferred) at the end of <head>,
+  right after the :root palette block, so a dark page never paints one frame with the light page's grain.
+  It reads the page palette (--p-*) and sets, on <html>, what backgrounds.css cannot know in CSS:
+    data-mode  light | dark    is the page ink lighter than the page bg?
+    data-tint  away            (only when) the bg is a strong colour or a mid tone: tints move away from the
+                               ink, which only ever adds contrast
+    data-lowchroma             (only when) the accent is a grey or near-grey: .bg-stage then takes the lit
+                               ground's colour instead of a hue that does not exist
+    --g-k      0.08 to 1       how strongly the tints may show on this palette: the contrast headroom of the
+                               ink (7:1) and muted (4.5:1) text, in lightness, over the depth the grounds are
+                               drawn at. A palette whose ink is only just 7:1 on its bg gets almost flat grounds
+                               (an away palette keeps 1: its tints only add contrast)
+    --g-kl     the same headroom, kept for the grounds that draw in the ink's own direction (the rules, dots, rings)
+    --g-kp     the same, counted on the raw muted text, for the two page grounds (paper, topglow), which set no tokens
+    --g-kd     the same for the dark grounds (horizon, deep, photo)
+  An attribute or variable the page (or start.mjs) already set is kept (--g-k, --g-kl, --g-kd each on its own: inline on
+  <html> or in a stylesheet). It also pauses the .bg-liquid blobs while their section is off screen, and measures each
+  .bg-photo's words to set how high its scrim stays deep (--scrim-h, or --scrim-w for .bg-photo--left on a wide screen).
+  Every other ground is plain CSS.
+*/
+(() => {
+  const root = document.documentElement;
+  const get = n => getComputedStyle(root).getPropertyValue(n).trim();
+  const hex = n => {
+    let v = get(n).replace('#', '');
+    if (v.length === 3) v = [...v].map(c => c + c).join('');
+    return /^[0-9a-f]{6}$/i.test(v) ? [0, 2, 4].map(i => parseInt(v.slice(i, i + 2), 16) / 255) : null;
+  };
+  const lin = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const Y = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  const oklab = rgb => {
+    const [r, g, b] = rgb.map(lin);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+  };
+  const REF = 0.22;  // the deepest a tint is drawn at k = 1, in oklab lightness
+  /* how far (oklab L) a ground of colour bg may move toward the ink and keep ink 7:1 and the muted
+     text a ground uses (60% ink, 40% palette muted) 4.5:1 */
+  const room = (ink, muted, bg, bgScale = 1, mixInk = 0.6) => {
+    const Li = oklab(ink)[0], Lm = mixInk * Li + (1 - mixInk) * oklab(muted)[0], Lb = oklab(bg)[0] * bgScale, Yi = Y(ink), Ym = Lm ** 3;
+    if (Li > Lb) {
+      const max = Math.min((Yi + 0.05) / 7 - 0.05, (Ym + 0.05) / 4.5 - 0.05) * 0.8;
+      return max > 0 ? Math.cbrt(max) - Lb : 0;
+    }
+    const min = Math.max(7 * (Yi + 0.05) - 0.05, 4.5 * (Ym + 0.05) - 0.05) * 1.15;
+    return min < 1 ? Lb - Math.cbrt(min) : 0;
+  };
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  const detect = force => {
+    const bg = hex('--p-bg'), ink = hex('--p-ink'), muted = hex('--p-muted');
+    if (!bg || !ink) return;
+    const a = oklab(bg), b = oklab(ink);
+    if (force || !root.dataset.mode) root.dataset.mode = b[0] > a[0] ? 'dark' : 'light';
+    if (force) { root.removeAttribute('data-tint'); ['--g-k', '--g-kl', '--g-kd', '--g-kp'].forEach(p => root.style.removeProperty(p)); }
+    const ac = hex('--p-accent');
+    if (ac) root.toggleAttribute('data-lowchroma', Math.hypot(oklab(ac)[1], oklab(ac)[2]) < 0.045);
+    const away = Math.hypot(a[1], a[2]) > 0.09 || (a[0] > 0.3 && a[0] < 0.84);
+    if (away && !root.hasAttribute('data-tint')) root.setAttribute('data-tint', 'away');
+    const m = muted || ink;
+    /* a strength the page already set (inline on <html>, or in a stylesheet: anything but the CSS default of 1) is kept, each on its own */
+    const mine = n => force || (!root.dataset.k && root.style.getPropertyValue(n).trim() === '' && ['', '1'].includes(get(n)));
+    const kl = clamp(room(ink, m, bg) / REF, 0.08, 1);
+    if (mine('--g-kl')) root.style.setProperty('--g-kl', kl.toFixed(3));
+    if (mine('--g-k')) root.style.setProperty('--g-k', root.dataset.tint === 'away' ? '1' : kl.toFixed(3));
+    /* the page grounds (paper, topglow) sit under the page's own muted text, which they do not re-mix: their headroom is counted on the palette's raw muted */
+    if (mine('--g-kp')) root.style.setProperty('--g-kp', root.dataset.tint === 'away' ? '1' : clamp(room(ink, m, bg, 1, 0) / REF, 0.08, 1).toFixed(3));
+    const db = hex('--g-dark-bg'), di = hex('--g-dark-ink'), dm = hex('--g-dark-muted');
+    if (db && di && dm && mine('--g-kd')) root.style.setProperty('--g-kd', clamp(room(di, dm, db, 0.8) / REF, 0.08, 1).toFixed(3));
+  };
+  detect(false);
+  window.tasteBackgrounds = { detect: () => detect(true) };
+
+  /* the pause disc (WCAG 2.2.2: it moves for more than 5 s): the system's own .loop-pause, same icons, in the section's
+     bottom-right corner; it holds the blobs with .is-held. Nothing under prefers-reduced-motion, where they hold still. */
+  const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.25" y="3.25" width="2.75" height="9.5" rx="0.9"/><rect x="9" y="3.25" width="2.75" height="9.5" rx="0.9"/></svg>';
+  const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.25 3.7v8.6c0 .62.68 1 1.2.66l6.5-4.3c.47-.31.47-1 0-1.32l-6.5-4.3c-.52-.34-1.2.04-1.2.66Z"/></svg>';
+  const hold = el => {
+    if (el.hasAttribute('data-no-pause') || matchMedia('(prefers-reduced-motion: reduce)').matches || el.querySelector(':scope > .loop-pause')) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'loop-pause';
+    const show = () => { const held = el.classList.contains('is-held'), label = (held ? 'Play' : 'Pause') + ' animation'; b.innerHTML = held ? ICON_PLAY : ICON_PAUSE; b.setAttribute('aria-label', label); b.title = label; };
+    b.addEventListener('click', () => { el.classList.toggle('is-held'); show(); });
+    show(); el.append(b);
+  };
+  const watch = () => {
+    const live = document.querySelectorAll('.bg-liquid');
+    live.forEach(hold);
+    if (live.length && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-off', !e.isIntersecting)), { rootMargin: '80px' });
+      live.forEach(el => { el.classList.add('is-off'); io.observe(el); });
+    }
+  };
+  /* the scrim of a photograph must stay deep under every word: measure where the words start (their top edge, as a share of the
+     section's height, from the bottom; their right edge for .bg-photo--left on a wide screen) and keep the deep part of the
+     scrim 8% past it. A value the section sets itself (inline) is kept. */
+  const fit = el => {
+    const r = el.getBoundingClientRect();
+    if (!r.height || !r.width) return;
+    const words = [...el.querySelectorAll('h1, h2, h3, h4, p, a, button, li, blockquote, figcaption, .btn-row')].filter(w => !w.closest('.bg-photo__img') && w.getClientRects().length);
+    if (!words.length) return;
+    const top = Math.min(...words.map(w => w.getBoundingClientRect().top)), right = Math.max(...words.map(w => w.getBoundingClientRect().right));
+    if (!el.dataset.scrimHSet) {
+      const h = Math.min(100, Math.max(40, ((r.bottom - top) / r.height) * 100 + 8));
+      el.style.setProperty('--scrim-h', h.toFixed(1) + '%');
+    }
+    if (!el.dataset.scrimWSet) el.style.setProperty('--scrim-w', Math.min(100, Math.max(30, ((right - r.left) / r.width) * 100 + 8)).toFixed(1) + '%');
+  };
+  const photos = () => {
+    document.querySelectorAll('.bg-photo').forEach(el => {
+      /* a page-set inline value is kept: remember it before the first measure */
+      if (el.dataset.scrimHSet == null) el.dataset.scrimHSet = el.style.getPropertyValue('--scrim-h') ? '1' : '';
+      if (el.dataset.scrimWSet == null) el.dataset.scrimWSet = el.style.getPropertyValue('--scrim-w') ? '1' : '';
+      fit(el);
+      if ('ResizeObserver' in window && !el.__fit) { el.__fit = new ResizeObserver(() => fit(el)); el.__fit.observe(el); }
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { watch(); photos(); }, { once: true }); else { watch(); photos(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(photos);
+})();
+</script>
 <script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
 <link rel="modulepreload" href="assets/moments/moments.js">
 <link rel="modulepreload" href="assets/moments/lib.js">
@@ -206,11 +325,24 @@
   /* the three cards stack from 640 to 1023, so the section takes two screens there (layout-v4.md section 2) */
   @media (min-width: 640px) and (max-width: 1279px) { #projects { --h: 2; } }
 
-  /* the three project cards hold drawn windows: each fragment fills its panel and is cut by the fade */
-  #projects .panel { --p-h: 416px; }
-  @media (max-width: 639px) { #projects .panel { --p-h: 330px; } }
+  /* the three project cards hold drawn windows: each one sits whole inside its panel with ground
+     under it (cards.md: terminal-run and pipeline-board are never cut or faded), so the card's
+     point — the status line, the running step, the claim — is always read in full. The panel is
+     tall enough at every width for the tallest of the three (the terminal, 40px head + 11 rows). */
+  #projects .panel { --p-h: 332px; }
+  #projects .pj { --fit-max: 420px; --ax: 28px; --ay: 32px; --ay-sm: 18px; }
   #projects .pj > .ui { width: 100%; }
-  #projects .pj { --fit-max: 420px; --ax: 24px; --ay: 150px; --ay-sm: 96px; }
+  /* phone: three stacked cards must still hold to two screens (layout-v4.md section 2), so the
+     panel is shorter and the two tallest windows give up the rows that carry no point — the
+     terminal keeps its last rows and scrolls the older ones off as a terminal does, the pipeline
+     drops its commit line. Nothing is cut by an edge at any width. */
+  @media (max-width: 639px) {
+    #projects .panel { --p-h: 272px; }
+    #projects .ui-term__screen { height: 192px; }
+    #projects .ui-pipe__commit { display: none; }
+  }
+  /* the card's link sits on one line under the text, above the panel */
+  #projects .card--open > .card__link { margin-bottom: 4px; }
   /* the work split: the provider list rises out of the frame's foot and is cut by its fade */
   #work .wk { --fit-max: 560px; --ax: 34px; --ay: 168px; --ay-sm: 88px; }
   #projects .ui-code__pre, #projects .ui-term__track, #projects .ui-pipe__cmd { font-size: 11px; }
@@ -1319,7 +1451,8 @@
         <article class="card card--row card--open span-4">
           <h3>MCP-Hardener guards agent tools</h3>
           <p>Turns an OpenAPI spec into an MCP server an agent cannot misuse: read-only by default, writes held for a single-use approval.</p>
-          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj" data-ui-loop>
+          <a class="card__link" href="https://hardened-mcp.mcphardener.workers.dev" target="_blank" rel="noopener">Open the review console<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h9.5M9 4.5 12.5 8 9 11.5"/></svg></a>
+          <div class="panel"><div class="stage"><div class="at-rise fit pj" data-ui-loop>
 <div class="ui ui-panel ui-code" data-ui="code">
                 <div class="ui-code__tabs">
                   <span class="ui-code__tab is-on"><i class="ui-code__lang">TS</i>policy.ts</span>
@@ -1340,7 +1473,8 @@
         <article class="card card--row card--open span-4">
           <h3>KubeMedic reads crash logs</h3>
           <p>A five-node LangGraph agent that turns Kubernetes crash logs into a remediation guide, in place of half an hour of correlation.</p>
-          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj">
+          <a class="card__link" href="https://github.com/aoutix/kubemedic" target="_blank" rel="noopener">Read the code on GitHub<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h9.5M9 4.5 12.5 8 9 11.5"/></svg></a>
+          <div class="panel"><div class="stage"><div class="at-rise fit pj" data-ui-loop>
 <div class="ui ui-panel ui-term" data-ui="terminal-run">
                 <div class="ui-term__head">
                   <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -1369,7 +1503,8 @@
         <article class="card card--row card--open span-4">
           <h3>The ETL pipeline holds bad rows</h3>
           <p>Unrecoverable records go to a Postgres dead-letter queue and the batch finishes, behind idempotent validated upserts.</p>
-          <div class="panel"><div class="stage stage--fade-b"><div class="at-rise to-edge fit pj">
+          <a class="card__link" href="https://github.com/aoutix/self-healing-etl-pipeline" target="_blank" rel="noopener">Read the code on GitHub<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h9.5M9 4.5 12.5 8 9 11.5"/></svg></a>
+          <div class="panel"><div class="stage"><div class="at-rise fit pj" data-ui-loop>
 <div class="ui ui-panel ui-pipe" data-ui="pipeline-board">
                 <div class="ui-pipe__head">
                   <svg class="ui-icon ui-pipe__branch" viewBox="0 0 16 16" aria-hidden="true"><circle cx="4.5" cy="3.5" r="1.5"/><circle cx="4.5" cy="12.5" r="1.5"/><circle cx="11.5" cy="5" r="1.5"/><path d="M4.5 5v6M11.5 6.5c0 2.6-2.2 3.6-5.6 4.6"/></svg>
@@ -1467,6 +1602,7 @@
       <div class="section-head">
         <h2 id="close-h">Ask me a question out loud</h2>
         <p>No sign-in. The mic is at the top of the page.</p>
+        <p class="closing__contact">No mic, or rather just write? Email me at <a class="link" href="mailto:adityadurjay@gmail.com">adityadurjay@gmail.com</a> or message me on <a class="link" href="https://www.linkedin.com/in/das-aditya">LinkedIn</a>.</p>
       </div>
       <a class="btn btn--primary btn--xl btn--wide" href="#top" data-mic>Start talking<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
     </div>
